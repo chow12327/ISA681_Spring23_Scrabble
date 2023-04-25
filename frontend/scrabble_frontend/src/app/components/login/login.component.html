@@ -1,0 +1,25 @@
+<br> <br>
+<h1>Login to play Scrabble!</h1>
+<br> <br>
+<div class="container">
+  <div class="alert alert-warning" *ngIf='invalidLogin'>{{errorMessage}}</div>
+
+  <div>
+    <div class="form-group">
+      <label for="username">User Name</label>
+      <input type="text" class="form-control" id="username" name="username" [(ngModel)]="username">
+    </div>
+    <div class="form-group">
+      <label for="password">Password</label>
+      <input type="password" class="form-control" id="password" name="password" [(ngModel)]="password">
+    </div>
+    <br>
+    <br>
+    <!-- User Name : {{username}} -->
+
+    <!-- <button (click)=handleLogin() class="btn btn-success">Login</button> -->
+    <!-- <button (click)=handleBasicAuthLogin() class="btn btn-success">Login</button> -->
+    <button (click)=handleJWTAuthLogin() class="btn btn-success">Login</button>
+
+  </div>
+</div>

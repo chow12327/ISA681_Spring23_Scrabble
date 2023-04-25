@@ -4,10 +4,9 @@ import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.data.rest.core.annotation.RepositoryRestResource;
-import org.springframework.data.rest.core.annotation.RestResource;
 
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name="gameplayers")
@@ -35,5 +34,11 @@ public class GamePlayer {
     @Column(name="updateDate")
     @UpdateTimestamp
     private Date updateDate;
+
+    @OneToMany(mappedBy = "movePlayer")
+    private List<GameMove> gameMoves;
+
+    @OneToMany(mappedBy = "plGamePlayer")
+    private List<PlayerLetter> playerLetters;
 
 }

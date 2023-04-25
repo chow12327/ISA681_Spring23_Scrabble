@@ -1,0 +1,36 @@
+<br>
+<br>
+<h1>Create Account to play Scrabble!</h1>
+
+<form>
+    
+    <div class="alert alert-warning" *ngIf='invalidAccount'>{{errorMessage}}</div>
+    <div class="alert alert-warning" *ngIf='accountCreated; else elseBlock'>{{successMessage}}</div>
+    <ng-template #elseBlock>
+    <div class="container">
+    <div class="form-group">
+        <label for="username">User Name</label>
+        <input type="text" class="form-control" id="username" name="username" [(ngModel)]="username">
+    </div>
+    <div class="form-group">
+        <label for="firstname">First Name</label>
+        <input type="text" class="form-control" id="firstname" name="firstname" [(ngModel)]="firstname">
+    </div>
+    <div class="form-group">
+        <label for="lastname">Last Name</label>
+        <input type="text" class="form-control" id="lastname" name="lastname" [(ngModel)]="lastname">
+    </div> 
+    <div class="form-group">
+        <label for="emailid">Email ID</label>
+        <input type="email" class="form-control" id="emailid" name="emailid" [(ngModel)]="emailid" email="true">
+    </div> 
+    <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" class="form-control" id="password" name="password" [(ngModel)]="password">
+    </div> 
+    <br>
+    <br>
+    <button (click)=createAccount() class="btn btn-primary">Create</button>
+    </div>
+</ng-template>
+</form>

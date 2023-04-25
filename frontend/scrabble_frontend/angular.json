@@ -66,6 +66,11 @@
               "browserTarget": "scrabble_frontend:build:development"
             }
           },
+          "options": {
+            "sslKey": "/Users/nidhichowdhry/Documents/GMU/ISA 681/example.key",
+           "sslCert": "/Users/nidhichowdhry/Documents/GMU/ISA 681/example.crt",
+            "port": 4043
+          },
           "defaultConfiguration": "development"
         },
         "extract-i18n": {

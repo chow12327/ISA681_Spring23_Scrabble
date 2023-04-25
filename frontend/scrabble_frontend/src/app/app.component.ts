@@ -6,5 +6,7 @@ import { Component } from '@angular/core';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  title = 'scrabble_frontend';
+ 
+  title = 'Scrabble';
+  greeting = 'Welcome to Scrabble';
 }
