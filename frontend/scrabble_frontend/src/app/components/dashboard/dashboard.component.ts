@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Player } from 'src/app/common/player';
 import { PlayerService } from 'src/app/services/player.service';
-import { APP_NAME } from './../../config';
+import { BasicAuthenticationService } from 'src/app/services/basic-authentication.service';
 
 
 @Component({
@@ -10,30 +10,36 @@ import { APP_NAME } from './../../config';
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
+
 export class DashboardComponent implements OnInit{
 
 players: Player[] = [];
 
-constructor(private configService: PlayerService, private router: Router) {
-  const token = localStorage.getItem('token');
-}
-ngOnInit(): void {
+constructor(private playerService: PlayerService, 
+  private router: Router,
+  private basicAuthenticationService: BasicAuthenticationService) {
+  const token = localStorage.getItem('token'); }
 
-  this.configService.getPlayerList().subscribe(
+  ngOnInit(): void {
+    this.listPlayers()
+  }
+
+
+listPlayers() {
+  this.playerService.getPlayerList().subscribe(
     data => {
       this.players = data;
     },
-    (err: any) => {
-      if (err.status === 403) {
-        localStorage.removeItem('token');
+    error => {
+      if (error.status === 401) {
+        this.basicAuthenticationService.logout();
         this.router.navigate(['login']);
       }
     }
-  );
-}
+  )}
 
-logout() {
-  localStorage.removeItem('token');
-  window.location.href = `https://${APP_NAME}?action=logout`;
-}
+  startNewGame() {
+    this.router.navigate(['game'])
+  }
+
 }

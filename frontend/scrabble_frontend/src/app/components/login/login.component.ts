@@ -20,7 +20,9 @@ export class LoginComponent implements OnInit {
     private basicAuthenticationService: BasicAuthenticationService) {
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.basicAuthenticationService.logout()
+  }
 
   handleJWTAuthLogin() {
     this.basicAuthenticationService.executeJWTAuthenticationService(this.username, this.password)
@@ -35,6 +37,10 @@ export class LoginComponent implements OnInit {
             this.invalidLogin = true
           }
         )
+  }
+
+  navigatetoSignUp() {
+    this.router.navigate(['signup'])
   }
 
 }

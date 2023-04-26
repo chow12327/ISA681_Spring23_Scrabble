@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { BasicAuthenticationService } from 'src/app/services/basic-authentication.service';
 import { SignupService } from 'src/app/services/signup.service';
 
 @Component({
@@ -25,10 +26,13 @@ export class SignupComponent implements OnInit{
   accountCreated = false
 
   constructor(private router: Router, 
-    private signupService: SignupService) {
+    private signupService: SignupService,
+    private basicAuthenticationService: BasicAuthenticationService) {
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.basicAuthenticationService.logout();
+  }
 
   createAccount(){
     this.signupService.createPlayerAccount(this.username, this.password,this.firstname,this.lastname,this.emailid)

@@ -1,18 +1,42 @@
 <div class="container">
-    <h1 class="mt-3 mb-3">Scrabble</h1>
+    <h1 class="mt-3 mb-3">Welcome to Scrabble</h1>
     <div class="container">
-      <p>Welcome!</p>
-    </div>
-  
-   <!--<app-player-list></app-player-list> -->
-  </div>
+        <div class="row">
+            <div class="col">
+                <p>Player Wins and Losses</p>
+            </div>
+            <div class="col">
+                <p>View Historical Games</p>
+            </div>
+            <div class="col">
+                <button (click)=startNewGame() class="btn btn-success">Start New Game</button>
+            </div>
+        </div>
 
-  <!--
-<h1>Welcome</h1>
-<div [hidden]="!authenticated()">
-	<p>{{greeting.id}}</p>
-	<p>The content is {{greeting.content}}</p>
+        <div class="row">
+            <div class="col">
+    <div class="table-responsive-md">
+    <table class="table" >
+      <thead class="thead-dark">
+          <tr>
+              <th>Username</th>
+              <th>Wins</th>
+              <th>Losses</th>
+          </tr>
+      </thead>
+      <tbody>
+          <tr *ngFor="let tempPlayer of players">
+              <td>{{ tempPlayer.userName }}</td>
+              <td>{{ tempPlayer.wins }}</td>
+              <td>{{ tempPlayer.losses }}</td>
+          </tr>
+      </tbody>
+  </table>
+  </div>
 </div>
-<div [hidden]="authenticated()">
-	<p>Login to see your greeting</p>
-</div>-->
+<div class="col"></div>
+<div class="col"></div>
+</div>
+</div>
+
+</div>
