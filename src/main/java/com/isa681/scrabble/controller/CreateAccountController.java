@@ -24,6 +24,7 @@ public class CreateAccountController {
     @PostMapping("/createAccount")
     public void login(@RequestBody SignUpRequest signUpRequest){
 
+        ValidationController.validateSignUpRequest(signUpRequest);
         Player player = new Player();
         player.setFirstName(signUpRequest.firstname());
         player.setLastName(signUpRequest.lastname());

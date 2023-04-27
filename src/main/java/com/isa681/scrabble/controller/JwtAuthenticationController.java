@@ -29,6 +29,7 @@ public class JwtAuthenticationController {
     public ResponseEntity<JwtTokenResponse> generateToken(
             @RequestBody JwtTokenRequest jwtTokenRequest) {
 
+        ValidationController.validateJwtTokenRequestRequest(jwtTokenRequest);
         var authenticationToken =
                 new UsernamePasswordAuthenticationToken(
                         jwtTokenRequest.username(),
