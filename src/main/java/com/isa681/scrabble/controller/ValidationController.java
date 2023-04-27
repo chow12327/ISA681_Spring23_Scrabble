@@ -15,12 +15,12 @@ public class ValidationController {
         String password = signUpRequest.password();
         String emailId = signUpRequest.emailid();
 
-        if (firstName == null || firstName.length() < 6 || !firstName.matches("[a-zA-Z0-9]+")) {
-            throw new IllegalArgumentException("Invalid First Name. Only accepts alphabetic characters and should be more than 6 characters.");
+        if (firstName == null || firstName.length() < 8 || !firstName.matches("[a-zA-Z]+")) {
+            throw new IllegalArgumentException("Invalid First Name. Only accepts alphabetic characters and should be more than 8 characters.");
         }
 
-        if (lastName == null || lastName.length() < 6 || !lastName.matches("[a-zA-Z0-9]+")) {
-            throw new IllegalArgumentException("Invalid Last Name. Only accepts alphabetic characters and should be more than 6 characters.");
+        if (lastName == null || lastName.length() < 8 || !lastName.matches("^[a-zA-Z]+\\'\\s?[a-zA-Z]+$")) {
+            throw new IllegalArgumentException("Invalid Last Name. Only accepts alphabetic characters and should be more than 8 characters.");
         }
 
         if (username == null || username.length() < 6 || !username.matches("[a-zA-Z0-9]+")) {
