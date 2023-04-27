@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { Game } from 'src/app/common/game';
 import { GameService } from 'src/app/services/game.service';
 
 @Component({
@@ -9,19 +8,18 @@ import { GameService } from 'src/app/services/game.service';
 })
 export class GameListComponent {
 
-games: Game[] = [];
 constructor(private gameService: GameService){}
 
 ngOnInit(): void{
-  this.listGames()
+ // this.listGames()
 }
 
-listGames() {
-    this.gameService.getGameList().subscribe(
-      data => {
-        this.games = data;
-      }
-    )
-  }
+// listGames() {
+//     this.gameService.getGameList().subscribe(
+//       data => {
+//         //this.games = data;
+//       }
+//     )
+//   }
 
 }

@@ -13,6 +13,7 @@ import { HttpIntercepterBasicAuthService } from './services/http-intercepter-bas
 import { LogoutComponent } from './components/logout/logout.component';
 import { SignupComponent } from './components/signup/signup.component';
 import { GameComponent } from './components/game/game.component';
+import { InitializeGridService } from './services/initialize-grid.service';
 
 @NgModule({
   declarations: [
@@ -30,7 +31,7 @@ import { GameComponent } from './components/game/game.component';
     FormsModule,
     HttpClientModule
   ],
-  providers: [GameService,PlayerService, {provide: HTTP_INTERCEPTORS, useClass: HttpIntercepterBasicAuthService, multi: true }],
+  providers: [GameService,PlayerService, InitializeGridService,{provide: HTTP_INTERCEPTORS, useClass: HttpIntercepterBasicAuthService, multi: true }],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
