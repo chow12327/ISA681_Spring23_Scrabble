@@ -15,6 +15,8 @@ import { SignupComponent } from './components/signup/signup.component';
 import { GameComponent } from './components/game/game.component';
 import { InitializeGridService } from './services/initialize-grid.service';
 
+
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -29,7 +31,7 @@ import { InitializeGridService } from './services/initialize-grid.service';
     BrowserModule,
     AppRoutingModule,
     FormsModule,
-    HttpClientModule
+    HttpClientModule,
   ],
   providers: [GameService,PlayerService, InitializeGridService,{provide: HTTP_INTERCEPTORS, useClass: HttpIntercepterBasicAuthService, multi: true }],
   bootstrap: [AppComponent]

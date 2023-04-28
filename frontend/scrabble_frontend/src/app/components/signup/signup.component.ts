@@ -12,11 +12,14 @@ import { SignupService } from 'src/app/services/signup.service';
 
 
 export class SignupComponent implements OnInit{
-  username = ''
-  password = ''
-  firstname = ''
-  lastname = ''
-  emailid = ''
+  user = {
+    username: '',
+    password: '',
+    firstname: '',
+    lastname: '',
+    emailid: ''
+  };
+  
 
   errorMessage = 'Invalid data provided. Please try again!'
   successMessage = 'Account created! Click on login to play scrabble!'
@@ -35,7 +38,7 @@ export class SignupComponent implements OnInit{
   }
 
   createAccount(){
-    this.signupService.createPlayerAccount(this.username, this.password,this.firstname,this.lastname,this.emailid)
+    this.signupService.createPlayerAccount(this.user.username, this.user.password,this.user.firstname,this.user.lastname,this.user.emailid)
     .subscribe(
       data => {
         console.log(data)
