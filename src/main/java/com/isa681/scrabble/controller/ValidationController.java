@@ -15,16 +15,16 @@ public class ValidationController {
         String password = signUpRequest.password();
         String emailId = signUpRequest.emailid();
 
-        if (firstName == null || firstName.length() > 2 || firstName.length() < 20 || !firstName.matches("^[a-zA-Z]+$")) {
-            throw new IllegalArgumentException("Invalid First Name. Only accepts alphabetic characters and should be more than 8 characters.");
+        if (firstName == null || firstName.length() < 2 || firstName.length() > 20 || !firstName.matches("^[a-zA-Z]+$")) {
+            throw new IllegalArgumentException("Invalid First Name. Only accepts alphabetic characters and should be between 2 and 20 characters.");
         }
 
-        if (lastName == null || lastName.length() > 2 || lastName.length() < 20 || !lastName.matches("^[a-zA-Z]+\\'\\s?[a-zA-Z]+$")) {
-            throw new IllegalArgumentException("Invalid Last Name. Only accepts alphabetic characters and should be more than 8 characters.");
+        if (lastName == null || lastName.length() < 2 || lastName.length() > 20 || !lastName.matches("^[a-zA-Z]+$")) {
+            throw new IllegalArgumentException("Invalid Last Name. Only accepts alphabetic characters and should be between 2 and 20 characters.");
         }
 
-        if (username == null || username.length() > 2 || username.length() < 20 || !username.matches("^[a-zA-Z0-9]+$")) {
-            throw new IllegalArgumentException("Invalid Username. Only accepts alphabetic characters and should be more than 6 characters. ");
+        if (username == null || username.length() < 2 || username.length() > 20 || !username.matches("^[a-zA-Z0-9]+$")) {
+            throw new IllegalArgumentException("Invalid Username. Only accepts alphanumeric characters and should be between 2 and 20 characters. ");
         }
 
         if (password == null || !password.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,}$")) {
@@ -52,8 +52,8 @@ public class ValidationController {
         String username = jwtTokenRequest.username();
         String password = jwtTokenRequest.password();
 
-        if (username == null || username.length() < 6 || !username.matches("[a-zA-Z0-9]+")) {
-            throw new IllegalArgumentException("Invalid Username");
+        if (username == null || username.length() < 2 || username.length() > 20 || !username.matches("^[a-zA-Z0-9]+$")) {
+            throw new IllegalArgumentException("Invalid Username. Only accepts alphanumeric characters and should be between 2 and 20 characters.");
         }
 
         if (password == null || !password.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,}$")) {
