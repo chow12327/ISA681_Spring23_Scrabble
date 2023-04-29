@@ -12,6 +12,18 @@ export class GameComponent implements OnInit{
 
   gameGrid: Grid;
   tagme: boolean = true
+  gameid: string = "123455"
+  player1: string = "user1"
+  player2: string = "user2"
+  score1: number = 10
+  score2: number = 20
+
+  letter1: string= "A"
+  letter2: string= "B"
+  letter3: string= "C"
+  letter4: string= "D"
+  letter5: string= "E"
+  
 
   constructor( private router: Router,
     private initializeGridService: InitializeGridService) {
