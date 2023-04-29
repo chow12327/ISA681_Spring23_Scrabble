@@ -31,4 +31,15 @@ public class Game {
     @OneToMany(mappedBy = "game")
     private List<GamePlayer> gamePlayers;
 
+    public void setGameID(long gameID) {
+        this.id = gameID;
+    }
+
+    public void setIsFinished(boolean isFinished) {
+        this.isFinished = isFinished;
+    }
+
+    public void setIsDraw(boolean isDraw) {
+        this.isDraw = isDraw;
+    }
 }
