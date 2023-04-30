@@ -25,10 +25,10 @@ public class GameServiceImpl implements GameService {
     private MoveLocationRepository moveLocationRepository;
     private MoveWordsRepository moveWordsRepository;
     private PlayerLettersRepository playerLettersRepository;
-
     private PlayerRepository playerRepository;
-
     private LetterRepository letterRepository;
+    private SecureRandom rand;
+
     public GameServiceImpl(GameRepository gameRepository, GamePlayerRepository gamePlayerRepository,
                            GameMovesRepository gameMovesRepository, MoveLocationRepository moveLocationRepository,
                            MoveWordsRepository moveWordsRepository, PlayerLettersRepository playerLettersRepository,
@@ -41,6 +41,7 @@ public class GameServiceImpl implements GameService {
         this.playerLettersRepository = playerLettersRepository;
         this.playerRepository = playerRepository;
         this.letterRepository = letterRepository;
+        this.rand =  new SecureRandom();
     }
 
 
@@ -206,10 +207,9 @@ public class GameServiceImpl implements GameService {
     }
 
     private Letter getLetter(){
-         List<Letter> allLetters;
-         Letter selectedLetter;
-         allLetters =letterRepository.findAll();
-         SecureRandom rand = new SecureRandom();
+        List<Letter> allLetters;
+        Letter selectedLetter;
+        allLetters =letterRepository.findAll();
 
         selectedLetter = letterRepository.findById(rand.nextLong(allLetters.size())).get();
         return selectedLetter;
