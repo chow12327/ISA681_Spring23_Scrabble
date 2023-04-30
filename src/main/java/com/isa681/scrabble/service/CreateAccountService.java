@@ -1,6 +1,5 @@
 package com.isa681.scrabble.service;
 
-import com.isa681.scrabble.dto.Login;
 import com.isa681.scrabble.entity.Player;
 import org.springframework.stereotype.Service;
 

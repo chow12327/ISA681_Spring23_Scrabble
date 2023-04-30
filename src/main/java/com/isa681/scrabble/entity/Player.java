@@ -1,5 +1,6 @@
 package com.isa681.scrabble.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -49,6 +50,7 @@ public class Player {
     private int enabled;
 
     @OneToMany(mappedBy = "player")
+    @JsonManagedReference
     @RestResource(rel = "playerGames",path="playerGames")
     private List<GamePlayer> gamePlayers;
 

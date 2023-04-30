@@ -2,6 +2,7 @@ package com.isa681.scrabble.controller;
 
 import com.isa681.scrabble.entity.JwtTokenRequest;
 import com.isa681.scrabble.entity.JwtTokenResponse;
+import com.isa681.scrabble.exceptions.InvalidUserDetailsException;
 import com.isa681.scrabble.service.JwtTokenService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -27,9 +28,15 @@ public class JwtAuthenticationController {
 
     @PostMapping("/authenticate")
     public ResponseEntity<JwtTokenResponse> generateToken(
-            @RequestBody JwtTokenRequest jwtTokenRequest) {
+            @RequestBody JwtTokenRequest jwtTokenRequest) throws InvalidUserDetailsException {
 
-        ValidationController.validateJwtTokenRequestRequest(jwtTokenRequest);
+        try {
+            ValidationController.validateJwtTokenRequestRequest(jwtTokenRequest);
+        }
+        catch(Exception e)
+        {
+            throw(e);
+        }
         var authenticationToken =
                 new UsernamePasswordAuthenticationToken(
                         jwtTokenRequest.username(),

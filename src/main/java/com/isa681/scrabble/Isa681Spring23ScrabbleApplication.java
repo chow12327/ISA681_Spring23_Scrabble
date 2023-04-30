@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 
 @SpringBootApplication
-@EntityScan(basePackages = {"com.isa681.scrabble.entity"})
+//@EntityScan(basePackages = {"com.isa681.scrabble.entity"})
 public class Isa681Spring23ScrabbleApplication {
 
 	public static void main(String[] args) {

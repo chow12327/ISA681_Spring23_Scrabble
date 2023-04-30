@@ -20,7 +20,7 @@ public class JwtTokenService {
         this.jwtEncoder = jwtEncoder;
     }
 
-    public String generateToken(Authentication authentication) {
+    public String generateToken (Authentication authentication) {
 
         var scope = authentication
                 .getAuthorities()
@@ -31,7 +31,7 @@ public class JwtTokenService {
         var claims = JwtClaimsSet.builder()
                 .issuer("self")
                 .issuedAt(Instant.now())
-                .expiresAt(Instant.now().plus(90, ChronoUnit.MINUTES))
+                //.expiresAt(Instant.now().plus(90, ChronoUnit.MINUTES))
                 .subject(authentication.getName())
                 .claim("scope", scope)
                 .build();

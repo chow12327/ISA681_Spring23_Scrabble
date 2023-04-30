@@ -2,6 +2,7 @@ package com.isa681.scrabble.config;
 
 import com.isa681.scrabble.entity.Grid;
 import com.isa681.scrabble.entity.Letter;
+import com.isa681.scrabble.entity.Player;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
 import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurer;
@@ -23,6 +24,11 @@ public class StaticDataRestConfig implements RepositoryRestConfigurer {
 
         config.getExposureConfiguration()
                 .forDomainType(Grid.class)
+                .withItemExposure((metadata, httpMethods) -> httpMethods.disable(unsupportedActions))
+                .withCollectionExposure((metadata, httpMethods) -> httpMethods.disable(unsupportedActions));
+
+        config.getExposureConfiguration()
+                .forDomainType(Player.class)
                 .withItemExposure((metadata, httpMethods) -> httpMethods.disable(unsupportedActions))
                 .withCollectionExposure((metadata, httpMethods) -> httpMethods.disable(unsupportedActions));
     }

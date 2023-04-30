@@ -1,7 +1,9 @@
 package com.isa681.scrabble.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -29,6 +31,7 @@ public class Game {
     private Date updateDate;
 
     @OneToMany(mappedBy = "game")
+    @JsonManagedReference
     private List<GamePlayer> gamePlayers;
 
     public void setGameID(long gameID) {

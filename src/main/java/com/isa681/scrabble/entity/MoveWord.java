@@ -1,5 +1,6 @@
 package com.isa681.scrabble.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
@@ -17,6 +18,7 @@ public class MoveWord {
     private Long id;
 
     @ManyToOne
+    @JsonBackReference
     @JoinColumn(name = "moveID")
     private GameMove mwMove;
 

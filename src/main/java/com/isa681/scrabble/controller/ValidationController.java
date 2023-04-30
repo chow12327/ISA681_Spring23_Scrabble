@@ -2,6 +2,7 @@ package com.isa681.scrabble.controller;
 
 import com.isa681.scrabble.entity.JwtTokenRequest;
 import com.isa681.scrabble.entity.SignUpRequest;
+import com.isa681.scrabble.exceptions.InvalidUserDetailsException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.util.regex.Matcher;
