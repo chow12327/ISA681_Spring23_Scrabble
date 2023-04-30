@@ -1,17 +1,13 @@
 package com.isa681.scrabble.controller;
 
-import com.isa681.scrabble.entity.Game;
-import com.isa681.scrabble.entity.JwtTokenResponse;
-import com.isa681.scrabble.entity.Player;
-import com.isa681.scrabble.entity.SignUpRequest;
+import com.isa681.scrabble.entity.*;
 import com.isa681.scrabble.service.GameService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @CrossOrigin(origins="https://localhost:4043")
@@ -35,18 +31,33 @@ public class GameController {
 
     @PostMapping("/api/joinGame")
     public void joinGame(@RequestBody Long gameId){
+        ValidationController.validateGameId(gameId);
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         gameService.joinGame(gameId,username);
     }
 
-    @PostMapping("/api/gamedetails")
+    @GetMapping("/api/gamedetails")
     public ResponseEntity<Game> getGameDetails(@RequestBody Long gameId){
-        Game myGame;
+        ValidationController.validateGameId(gameId);
 
+        Game myGame;
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
 
         myGame = gameService.getGameDetails(gameId,username);
         return ResponseEntity.ok(myGame);
+    }
+
+    @GetMapping("/api/playerLetters")
+    public ResponseEntity<List<Letter>> getPlayerLetters(@RequestBody Long gameId){
+
+        ValidationController.validateGameId(gameId);
+
+        List<Letter> playerLetters;
+
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        playerLetters = gameService.getLettersforPlayer(gameId,username);
+        return ResponseEntity.ok(playerLetters);
     }
 
 

@@ -1,10 +1,12 @@
 package com.isa681.scrabble.service;
 
 import com.isa681.scrabble.entity.Game;
+import com.isa681.scrabble.entity.Letter;
 import com.isa681.scrabble.exceptions.UnauthorizedAccessException;
 import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -14,4 +16,8 @@ public interface GameService {
     void joinGame(Long gameId, String username);
 
     Game getGameDetails(Long gameId, String username);
+
+    List<Letter> getLettersforPlayer(Long gameId, String username);
+
+
 }

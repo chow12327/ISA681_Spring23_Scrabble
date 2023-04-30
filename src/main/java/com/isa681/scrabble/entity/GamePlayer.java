@@ -1,9 +1,10 @@
 package com.isa681.scrabble.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -12,39 +13,46 @@ import java.util.List;
 
 @Entity
 @Table(name="gameplayers")
-@Data
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "id")
 public class GamePlayer {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="gameplayerID")
+    @Getter @Setter
     private Long id;
 
     @ManyToOne
-    @JsonBackReference
+    @Getter @Setter
     @JoinColumn(name = "gameID")
     private Game game;
     @ManyToOne
-    @JsonBackReference
     @JoinColumn(name = "playerID")
+    @Getter @Setter
     private Player player;
     @Column(name="isWinner")
+    @Getter @Setter
     private boolean isWinner;
     @Column(name="isTurn")
+    @Getter @Setter
     private boolean isTurn;
     @Column(name="createDate")
+    @Getter @Setter
     @CreationTimestamp
     private Date createDate;
     @Column(name="updateDate")
+    @Getter @Setter
     @UpdateTimestamp
     private Date updateDate;
 
     @OneToMany(mappedBy = "movePlayer")
-    @JsonManagedReference
+    @Getter @Setter
     private List<GameMove> gameMoves;
 
     @OneToMany(mappedBy = "plGamePlayer")
-    @JsonManagedReference
+    @Getter @Setter
     private List<PlayerLetter> playerLetters;
 
 }

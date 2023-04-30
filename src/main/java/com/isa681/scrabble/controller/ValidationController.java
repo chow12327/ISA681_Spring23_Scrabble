@@ -37,6 +37,13 @@ public class ValidationController {
         }
     }
 
+
+    public static void validateGameId(Long gameId) {
+        if (gameId == null) {
+            throw new IllegalArgumentException("Invalid Game ID");
+        }
+    }
+
     private static boolean isValidEmail(String emailId) {
         String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\." +
                 "[a-zA-Z0-9_+&*-]+)*@" +

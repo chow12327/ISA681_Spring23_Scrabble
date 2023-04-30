@@ -4,6 +4,7 @@ package com.isa681.scrabble.service;
 import com.isa681.scrabble.dao.*;
 import com.isa681.scrabble.entity.Game;
 import com.isa681.scrabble.entity.GamePlayer;
+import com.isa681.scrabble.entity.Letter;
 import com.isa681.scrabble.entity.Player;
 import com.isa681.scrabble.exceptions.GameNotFoundException;
 import com.isa681.scrabble.exceptions.ResourceCannotBeCreatedException;
@@ -154,6 +155,39 @@ public class GameServiceImpl implements GameService {
 
         return myGame;
     }
+
+    @Override
+    public List<Letter> getLettersforPlayer(Long gameId, String username) {
+
+        GamePlayer myGamePlayer;
+
+        myGamePlayer = getGamePlayerfromusername(username,gameId);
+
+        return null;
+
+    }
+
+    private GamePlayer getGamePlayerfromusername(String username, Long gameId){
+        Player myPlayer;
+        Game myGame;
+        GamePlayer myGamePlayer;
+
+        myPlayer = playerRepository.findByUserName(username);
+
+        if(gameRepository.findById(gameId).isPresent()){
+            myGame = gameRepository.findById(gameId).get();
+        }
+        else
+        {
+            throw new GameNotFoundException(gameId.toString());
+        }
+
+        myGamePlayer = gamePlayerRepository.findGamePlayersByGameAndPlayer(myGame,myPlayer);
+
+        return myGamePlayer;
+
+    }
+
 }
 
 
