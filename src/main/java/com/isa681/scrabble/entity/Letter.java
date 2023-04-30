@@ -1,6 +1,7 @@
 package com.isa681.scrabble.entity;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -29,6 +30,7 @@ public class Letter {
     private Integer letterScore;
 
     @Column(name="count")
+    @JsonIgnore
     private Integer count;
 
     @Column(name="createDate")

@@ -2,10 +2,7 @@ package com.isa681.scrabble.service;
 
 
 import com.isa681.scrabble.dao.*;
-import com.isa681.scrabble.entity.Game;
-import com.isa681.scrabble.entity.GamePlayer;
-import com.isa681.scrabble.entity.Letter;
-import com.isa681.scrabble.entity.Player;
+import com.isa681.scrabble.entity.*;
 import com.isa681.scrabble.exceptions.GameNotFoundException;
 import com.isa681.scrabble.exceptions.ResourceCannotBeCreatedException;
 import com.isa681.scrabble.exceptions.UnauthorizedAccessException;
@@ -13,6 +10,7 @@ import jakarta.transaction.Transactional;
 import org.apache.coyote.Response;
 import org.springframework.stereotype.Service;
 
+import java.security.SecureRandom;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,10 +28,11 @@ public class GameServiceImpl implements GameService {
 
     private PlayerRepository playerRepository;
 
+    private LetterRepository letterRepository;
     public GameServiceImpl(GameRepository gameRepository, GamePlayerRepository gamePlayerRepository,
                            GameMovesRepository gameMovesRepository, MoveLocationRepository moveLocationRepository,
                            MoveWordsRepository moveWordsRepository, PlayerLettersRepository playerLettersRepository,
-                           PlayerRepository playerRepository) {
+                           PlayerRepository playerRepository, LetterRepository letterRepository) {
         this.gameRepository = gameRepository;
         this.gamePlayerRepository = gamePlayerRepository;
         this.gameMovesRepository = gameMovesRepository;
@@ -41,6 +40,7 @@ public class GameServiceImpl implements GameService {
         this.moveWordsRepository = moveWordsRepository;
         this.playerLettersRepository = playerLettersRepository;
         this.playerRepository = playerRepository;
+        this.letterRepository = letterRepository;
     }
 
 
@@ -157,13 +157,30 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
-    public List<Letter> getLettersforPlayer(Long gameId, String username) {
+    public List<PlayerLetter> getLettersforPlayer(Long gameId, String username) {
 
         GamePlayer myGamePlayer;
+        List<PlayerLetter> playerLetters;
 
         myGamePlayer = getGamePlayerfromusername(username,gameId);
 
-        return null;
+        playerLetters = playerLettersRepository.findPlayerLettersByPlGamePlayerAndUsedIsFalse(myGamePlayer);
+
+        if (playerLetters.isEmpty() || playerLetters.size() < 5){
+            do{
+                PlayerLetter newPlayerLetter = new PlayerLetter();
+                newPlayerLetter.setPlLetter(getLetter());
+                newPlayerLetter.setPlGamePlayer(myGamePlayer);
+                newPlayerLetter.setUsed(false);
+                //playerLetters.add(newPlayerLetter);
+                playerLettersRepository.saveAndFlush(newPlayerLetter);
+            }
+            while (playerLetters.size()<5);
+        }
+
+
+
+        return playerLetters;
 
     }
 
@@ -186,6 +203,16 @@ public class GameServiceImpl implements GameService {
 
         return myGamePlayer;
 
+    }
+
+    private Letter getLetter(){
+         List<Letter> allLetters;
+         Letter selectedLetter;
+         allLetters =letterRepository.findAll();
+         SecureRandom rand = new SecureRandom();
+
+        selectedLetter = letterRepository.findById(rand.nextLong(allLetters.size())).get();
+        return selectedLetter;
     }
 
 }

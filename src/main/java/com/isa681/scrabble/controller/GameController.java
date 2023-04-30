@@ -48,11 +48,11 @@ public class GameController {
     }
 
     @GetMapping("/api/playerLetters")
-    public ResponseEntity<List<Letter>> getPlayerLetters(@RequestBody Long gameId){
+    public ResponseEntity<List<PlayerLetter>> getPlayerLetters(@RequestBody Long gameId){
 
         ValidationController.validateGameId(gameId);
 
-        List<Letter> playerLetters;
+        List<PlayerLetter> playerLetters;
 
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
 

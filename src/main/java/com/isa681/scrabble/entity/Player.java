@@ -65,9 +65,7 @@ public class Player {
     private int enabled;
 
     @OneToMany(mappedBy = "player")
-  //  @JsonManagedReference
     @Getter @Setter
-    //@RestResource(rel = "playerGames",path="playerGames")
     private List<GamePlayer> gamePlayers;
 
 }

@@ -1,6 +1,7 @@
 package com.isa681.scrabble.entity;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -24,6 +25,7 @@ public class PlayerLetter {
     private Long id;
 
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "gameplayerID")
     @Getter @Setter
     private GamePlayer plGamePlayer;
@@ -33,9 +35,9 @@ public class PlayerLetter {
     @Getter @Setter
     private Letter plLetter;
 
-    @Column(name="is_used")
+    @Column(name="isUsed")
     @Getter @Setter
-    private boolean isUsed;
+    private boolean used;
 
     @Column(name="createDate")
     @Getter @Setter
