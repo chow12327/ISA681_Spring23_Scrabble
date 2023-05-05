@@ -1,6 +1,7 @@
 package com.isa681.scrabble.controller;
 import com.isa681.scrabble.entity.Game;
 import com.isa681.scrabble.entity.JwtTokenResponse;
+import com.isa681.scrabble.entity.Player;
 import com.isa681.scrabble.service.GetGameInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -38,4 +39,13 @@ public class GameViewController {
         }
         return ResponseEntity.ok(entities);
     }
+
+    @GetMapping("/api/players")
+    public ResponseEntity<List<Player>> getPlayers(){
+
+        List<Player> players;
+        players = myService.getPlayers();
+        return ResponseEntity.ok(players);
+    }
+
 }

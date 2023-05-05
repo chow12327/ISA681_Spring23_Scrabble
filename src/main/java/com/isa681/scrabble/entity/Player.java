@@ -1,6 +1,7 @@
 package com.isa681.scrabble.entity;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
@@ -32,14 +33,16 @@ public class Player {
     private String lastName;
     @Column(name="emailID")
     @Getter @Setter
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    //@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @JsonIgnore
     private String emailId;
     @Column(name="username")
     @Getter @Setter
     private String userName;
     @Column(name="password")
     @Getter @Setter
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    //@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @JsonIgnore
     private char[] password;
     @Column(name="wins")
     @Getter @Setter
@@ -64,6 +67,7 @@ public class Player {
     @Getter @Setter
     private int enabled;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "player")
     @Getter @Setter
     private List<GamePlayer> gamePlayers;

@@ -14,14 +14,14 @@ export class PlayerService {
 
   constructor(private httpClient: HttpClient) { }
   getPlayerList(): Observable<Player[]> {
-    return this.httpClient.get<GetResponse>(this.baseURL).pipe(
-      map(response => response._embedded.players)
+    return this.httpClient.get<Player[]>(this.baseURL).pipe(
+    //  map(response => response.players)
     );
   }
 }
 
 interface GetResponse {
-  _embedded: {
+  //_embedded: {
     players: Player[];
-  }
+  //}
 }

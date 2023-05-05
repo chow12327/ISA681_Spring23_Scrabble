@@ -1,5 +1,7 @@
 package com.isa681.scrabble.service;
+import com.isa681.scrabble.dao.PlayerRepository;
 import com.isa681.scrabble.entity.Game;
+import com.isa681.scrabble.entity.Player;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
@@ -14,12 +16,14 @@ import java.util.List;
 @Service
 public class GetGameInfoService {
     private Connection connection;
+    private PlayerRepository playerRepository;
 
-    public GetGameInfoService(Environment environment) throws SQLException {
+    public GetGameInfoService(Environment environment, PlayerRepository playerRepository) throws SQLException {
         String url = environment.getProperty("spring.datasource.url");
         String username = environment.getProperty("spring.datasource.username");
         String password = environment.getProperty("spring.datasource.password");
         connection = DriverManager.getConnection(url, username, password);
+        this.playerRepository = playerRepository;
     }
 
     public List<Game> GetHistoricGameInfo() throws SQLException {
@@ -59,4 +63,11 @@ public class GetGameInfoService {
     public void close() throws SQLException {
         connection.close();
     }
+
+    public List<Player> getPlayers(){
+        List<Player> players;
+        players =  playerRepository.findAll();
+        return players;
+    }
+
 }

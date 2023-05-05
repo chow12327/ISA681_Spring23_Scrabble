@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import java.util.List;
 
 @CrossOrigin
-@RepositoryRestResource
+//@RepositoryRestResource
 public interface PlayerRepository  extends JpaRepository<Player,Long> {
 
     Player findByUserName(String username);
