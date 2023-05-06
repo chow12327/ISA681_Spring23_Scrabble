@@ -5,6 +5,7 @@ import { PlayerService } from 'src/app/services/player.service';
 import { Histgame } from 'src/app/common/histgame';
 import { HistgamesService } from 'src/app/services/histgames.service';
 import { BasicAuthenticationService } from 'src/app/services/basic-authentication.service';
+import { GameService } from 'src/app/services/game.service';
 
 
 @Component({
@@ -13,17 +14,19 @@ import { BasicAuthenticationService } from 'src/app/services/basic-authenticatio
   styleUrls: ['./dashboard.component.css']
 })
 
-export class DashboardComponent implements OnInit{
+export class DashboardComponent implements OnInit {
 
-players: Player[] = [];
-histgames: Histgame[] = [];
-activegames: Histgame[] = [];
+  players: Player[] = [];
+  histgames: Histgame[] = [];
+  activegames: Histgame[] = [];
 
-constructor(private playerService: PlayerService, 
-  private histgamesService: HistgamesService,
-  private router: Router,
-  private basicAuthenticationService: BasicAuthenticationService) {
-  const token = localStorage.getItem('token'); }
+  constructor(private playerService: PlayerService,
+    private histgamesService: HistgamesService,
+    private gameService: GameService,
+    private router: Router,
+    private basicAuthenticationService: BasicAuthenticationService) {
+    const token = localStorage.getItem('token');
+  }
 
   ngOnInit(): void {
     this.listPlayers()
@@ -32,50 +35,64 @@ constructor(private playerService: PlayerService,
   }
 
 
-listPlayers() {
-  this.playerService.getPlayerList().subscribe(
-    data => {
-      this.players = data;
-    },
-    error => {
-      if (error.status === 401) {
-        this.basicAuthenticationService.logout();
-        this.router.navigate(['login']);
+  listPlayers() {
+    this.playerService.getPlayerList().subscribe(
+      data => {
+        this.players = data;
+      },
+      error => {
+        if (error.status === 401) {
+          this.basicAuthenticationService.logout();
+          this.router.navigate(['login']);
+        }
       }
-    }
-  )
-}
+    )
+  }
 
-listActiveGames(){
-  this.histgamesService.getActiveGameslist().subscribe(
-    data => {
-      this.activegames = data;
-    },
-    error => {
-      if (error.status == 401){
-        this.basicAuthenticationService.logout();
-        this.router.navigate(['login']);
+  listActiveGames() {
+    this.histgamesService.getActiveGameslist().subscribe(
+      data => {
+        this.activegames = data;
+      },
+      error => {
+        if (error.status == 401) {
+          this.basicAuthenticationService.logout();
+          this.router.navigate(['login']);
+        }
       }
-    }
-  )
-}
+    )
+  }
 
-listHistoricGames(){
-  this.histgamesService.getHistGameslist().subscribe(
-    data => {
-      this.histgames = data;
-    },
-    error => {
-      if (error.status == 401){
-        this.basicAuthenticationService.logout();
-        this.router.navigate(['login']);
+  listHistoricGames() {
+    this.histgamesService.getHistGameslist().subscribe(
+      data => {
+        this.histgames = data;
+      },
+      error => {
+        if (error.status == 401) {
+          this.basicAuthenticationService.logout();
+          this.router.navigate(['login']);
+        }
       }
-    }
-  )
-}
+    )
+  }
 
   startNewGame() {
-    this.router.navigate(['game'])
+    let game_id : Number;
+    this.gameService.createNewGame().subscribe(
+      data => {
+        game_id = data;
+        if(game_id != 0){
+          this.router.navigate(['game',game_id])
+        }
+      },
+      error => {
+        if (error.status === 401) {
+          this.basicAuthenticationService.logout();
+          this.router.navigate(['login']);
+        }
+      }
+    )
   }
 
   ViewGame(gmid: number) {

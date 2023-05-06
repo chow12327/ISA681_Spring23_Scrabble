@@ -1,5 +1,6 @@
 package com.isa681.scrabble.controller;
 
+import com.isa681.scrabble.entity.GameGrid;
 import com.isa681.scrabble.entity.JwtTokenRequest;
 import com.isa681.scrabble.entity.SignUpRequest;
 import com.isa681.scrabble.exceptions.InvalidUserDetailsException;
@@ -68,6 +69,15 @@ public class ValidationController {
             throw new IllegalArgumentException("Invalid Password");
         }
     }
+
+    public static void validateGameGrid(Character alphabet) {
+
+        if (alphabet!=null && !Character.isLetter(alphabet))
+        {
+            throw new IllegalArgumentException("Invalid value entered in grid!");
+        }
+    }
+
 
     @ExceptionHandler(IllegalArgumentException.class)
     public String handleIllegalArgumentException(IllegalArgumentException ex) {

@@ -2,6 +2,7 @@ package com.isa681.scrabble.controller;
 
 import com.isa681.scrabble.entity.*;
 import com.isa681.scrabble.service.GameService;
+import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,36 +20,54 @@ public class GameController {
         this.gameService = gameService;
     }
 
-    @PostMapping("/api/createGame")
-    public ResponseEntity<String> createGame(){
+    @PostMapping("/api/creategame")
+    public ResponseEntity<Long> createGame(){
         Game myGame;
 
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
 
         myGame = gameService.createNewGame(username);
-        return ResponseEntity.ok(myGame.getId().toString());
+        return ResponseEntity.ok(myGame.getId());
     }
 
     @PostMapping("/api/joinGame")
-    public void joinGame(@RequestBody Long gameId){
+    public void joinGame(@RequestParam Long gameId){
         ValidationController.validateGameId(gameId);
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         gameService.joinGame(gameId,username);
     }
+    
 
     @GetMapping("/api/gamedetails")
-    public ResponseEntity<Game> getGameDetails(@RequestBody Long gameId){
+    public ResponseEntity<GameBoardResponse> getGameDetails(@RequestParam Long gameId){
+        GameBoardResponse myGameBoard = new GameBoardResponse();
+
         ValidationController.validateGameId(gameId);
 
-        Game myGame;
+        //Game myGame;
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        myGame = gameService.getGameDetails(gameId,username);
-        return ResponseEntity.ok(myGame);
+        //myGame = gameService.getGameDetails(gameId,username);
+
+        myGameBoard.setId(gameId);
+        myGameBoard.setPlayer1Username(username);
+        myGameBoard.setPlayer1Score(0);
+
+        return ResponseEntity.ok(myGameBoard);
+
+       // return ResponseEntity.ok(myGame);
     }
 
-    @GetMapping("/api/playerLetters")
-    public ResponseEntity<List<PlayerLetter>> getPlayerLetters(@RequestBody Long gameId){
+    @PostMapping("/api/submitMove")
+    public void submitMove(@RequestBody MoveRequest myMove){
+        //System.out.println(myMove);
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        gameService.submitMove(myMove.getGameGrid(),myMove.getGameId(),username);
+    }
+
+
+    // @GetMapping("/api/playerLetters")
+    public ResponseEntity<List<PlayerLetter>> getPlayerLetters(@RequestParam Long gameId){
 
         ValidationController.validateGameId(gameId);
 

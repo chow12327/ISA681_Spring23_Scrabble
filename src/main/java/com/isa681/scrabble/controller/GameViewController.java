@@ -21,7 +21,7 @@ public class GameViewController {
     public ResponseEntity<List<Game>> getHistoricGames() {
         List<Game> entities = null;
         try {
-            System.out.println("Inside entities");
+            //System.out.println("Inside entities");
             entities = myService.GetHistoricGameInfo();
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -32,7 +32,7 @@ public class GameViewController {
     public ResponseEntity<List<Game>> getActiveGames() {
         List<Game> entities = null;
         try {
-            System.out.println("Inside entities");
+            //System.out.println("Inside entities");
             entities = myService.GetActiveGameInfo();
         } catch (SQLException e) {
             throw new RuntimeException(e);

@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Params, Route, Router } from '@angular/router';
 import { Grid } from 'src/app/common/grid';
-import { InitializeGridService } from 'src/app/services/initialize-grid.service';
 import { BasicAuthenticationService } from 'src/app/services/basic-authentication.service';
+import { GameService } from 'src/app/services/game.service';
+import { InitializeGridService } from 'src/app/services/initialize-grid.service';
 
 @Component({
   selector: 'app-game',
@@ -13,7 +14,7 @@ export class GameComponent implements OnInit{
 
   gameGrid: Grid;
   tagme: boolean = true
-  gameid: string = history.state.data;
+
   player1: string = "user1"
   player2: string = "user2"
   score1: number = 10
@@ -25,14 +26,39 @@ export class GameComponent implements OnInit{
   letter4: string= "D"
   letter5: string= "E"
   
+  gameid: string;
 
-  constructor( private router: Router,
-    private basicAuthenticationService: BasicAuthenticationService,
-    private initializeGridService: InitializeGridService) {
+  constructor( private route: ActivatedRoute,
+    private router: Router,
+    private initializeGridService: InitializeGridService,
+    private gameService: GameService,
+    private basicAuthenticationService: BasicAuthenticationService) {
     const token = localStorage.getItem('token'); }
 
   ngOnInit(): void {
+    this.route.params.subscribe((params: Params) => this.gameid = (params['gameId']));
+    this.getGameDetails();
     this.initializeGrid()
+  }
+
+
+  getGameDetails()
+  {
+    this.gameService.getGameDetails(this.gameid).subscribe(
+      data => {
+        console.log(data);
+        this.player1 = data["player1Username"];
+        this.score1 = data["player1Score"];
+        this.player2 = data["player2Username"];
+        this.score2 = data["player2Score"];
+      },
+      error => {
+        if (error.status === 401) {
+          this.basicAuthenticationService.logout();
+          this.router.navigate(['login']);
+        }
+      }
+    )
   }
 
   initializeGrid() {
@@ -49,10 +75,40 @@ export class GameComponent implements OnInit{
       }
     )
   }
+  
   lgout(){
     this.basicAuthenticationService.logout()
     alert("you have successfully logged out")
     this.router.navigate(['login'])
   }
+
+  submitMove(){
+
+    var newMove = 
+    {
+        "gameId": this.gameid,
+        "gameGrid": this.gameGrid
+    };
+    
+    this.gameService.submitmove(newMove).subscribe(
+      data => {
+        // game_id = data;
+        // if(game_id != 0){
+        //   this.router.navigate(['game',game_id])
+        // }
+      },
+      error => {
+        if (error.status == 401) {
+          this.basicAuthenticationService.logout();
+          this.router.navigate(['login']);
+        }
+        if (error.status == 400 ){
+          console.log("Invalid Move");
+        }
+      }
+    )
+
+  }
+
   
 }

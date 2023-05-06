@@ -68,8 +68,11 @@
           },
           "options": {
             "sslKey": "/Users/nidhichowdhry/Documents/GMU/ISA 681/example.key",
-           "sslCert": "/Users/nidhichowdhry/Documents/GMU/ISA 681/example.crt",
-            "port": 4043
+            "sslCert": "/Users/nidhichowdhry/Documents/GMU/ISA 681/example.crt",
+            "port": 4043,
+            "headers": {
+              "X-Frame-Options": "SAMEORIGIN"
+            }
           },
           "defaultConfiguration": "development"
         },

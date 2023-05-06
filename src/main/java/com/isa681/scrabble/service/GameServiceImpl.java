@@ -7,13 +7,13 @@ import com.isa681.scrabble.exceptions.GameNotFoundException;
 import com.isa681.scrabble.exceptions.ResourceCannotBeCreatedException;
 import com.isa681.scrabble.exceptions.UnauthorizedAccessException;
 import jakarta.transaction.Transactional;
-import org.apache.coyote.Response;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -87,17 +87,13 @@ public class GameServiceImpl implements GameService {
         List<GamePlayer> myGamePlayers;
         GamePlayer newGamePlayer = new GamePlayer();
 
-        if(gameRepository.findById(gameId).isPresent()){
-            myGame = gameRepository.findById(gameId).get();
-        }
-        else
-        {
-            throw new GameNotFoundException(gameId.toString());
-        }
+        myGame = getGameFromGameId(gameId);
 
         myGamePlayers = gamePlayerRepository.findGamePlayersByGame(myGame);
 
-        if(myGamePlayers!=null && myGamePlayers.size() == 1){
+        //TODO : Check for user already in GamePlayer, then just redirect to the game page. Do not add again.
+
+        if(myGamePlayers!=null && myGamePlayers.size() <= 1 ){
             myPlayer = playerRepository.findByUserName(username);
             newGamePlayer.setPlayer(myPlayer);
             newGamePlayer.setTurn(false);
@@ -126,17 +122,11 @@ public class GameServiceImpl implements GameService {
         Player myPlayer;
         Game myGame;
         List<GamePlayer> myGamePlayers;
-        GamePlayer newGamePlayer = new GamePlayer();
+        //GamePlayer newGamePlayer = new GamePlayer();
 
         myPlayer = playerRepository.findByUserName(username);
 
-        if(gameRepository.findById(gameId).isPresent()){
-            myGame = gameRepository.findById(gameId).get();
-        }
-        else
-        {
-            throw new GameNotFoundException(gameId.toString());
-        }
+        myGame = getGameFromGameId(gameId);
 
         myGamePlayers = gamePlayerRepository.findGamePlayersByGame(myGame);
 
@@ -163,7 +153,7 @@ public class GameServiceImpl implements GameService {
         GamePlayer myGamePlayer;
         List<PlayerLetter> playerLetters;
 
-        myGamePlayer = getGamePlayerfromusername(username,gameId);
+        myGamePlayer = getGamePlayerFromUsername(username,gameId);
 
         playerLetters = playerLettersRepository.findPlayerLettersByPlGamePlayerAndUsedIsFalse(myGamePlayer);
 
@@ -185,20 +175,13 @@ public class GameServiceImpl implements GameService {
 
     }
 
-    private GamePlayer getGamePlayerfromusername(String username, Long gameId){
+    private GamePlayer getGamePlayerFromUsername(String username, Long gameId){
         Player myPlayer;
         Game myGame;
         GamePlayer myGamePlayer;
 
         myPlayer = playerRepository.findByUserName(username);
-
-        if(gameRepository.findById(gameId).isPresent()){
-            myGame = gameRepository.findById(gameId).get();
-        }
-        else
-        {
-            throw new GameNotFoundException(gameId.toString());
-        }
+        myGame = getGameFromGameId(gameId);
 
         myGamePlayer = gamePlayerRepository.findGamePlayersByGameAndPlayer(myGame,myPlayer);
 
@@ -213,6 +196,50 @@ public class GameServiceImpl implements GameService {
 
         selectedLetter = letterRepository.findById(rand.nextLong(allLetters.size())).get();
         return selectedLetter;
+    }
+
+    private Game getGameFromGameId(Long gameId){
+        Game myGame;
+        if(gameRepository.findById(gameId).isPresent()){
+            myGame = gameRepository.findById(gameId).get();
+        }
+        else
+        {
+            throw new GameNotFoundException(gameId.toString());
+        }
+        return myGame;
+    }
+
+    @Override
+    public void submitMove(GameGrid myGamegrid, Long gameId, String username){
+
+        GamePlayer myGamePlayer;
+
+        myGamePlayer = getGamePlayerFromUsername(username,gameId);
+
+        if(Objects.isNull(myGamePlayer))
+        {throw new UnauthorizedAccessException("User not a player in this game");}
+//
+//
+//
+//        myGamePlayers = gamePlayerRepository.findGamePlayersByGame(myGame);
+//
+//        if(myGamePlayers.isEmpty())
+//        {
+//            throw new NullPointerException("No users in the game");
+//        }
+//
+//        List<Player> players = new ArrayList<>();
+//        myGamePlayers.forEach((x) -> players.add(x.getPlayer()));
+//
+//
+//        if (myGame.isFinished() == false && !players.contains(myPlayer))
+//        {
+//            throw new UnauthorizedAccessException("game");
+//        }
+//
+//        return myGame;
+
     }
 
 }

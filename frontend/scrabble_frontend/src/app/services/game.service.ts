@@ -1,29 +1,37 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { API_URL } from '../config';
 import { Observable } from 'rxjs';
-//import { Game } from '../common/grid';
-import {map} from 'rxjs/operators';
+import { Grid } from '../common/grid';
+
 @Injectable({
   providedIn: 'root'
 })
 export class GameService {
 
-  private baseURL = "https://localhost/api/games";
+  private baseURL = `${API_URL}/api`;
+  private createNewGameURL = `${this.baseURL}/creategame`;
+  private getGameBoardURL = `${this.baseURL}/gamedetails`;
+  private submitMoveURL = `${this.baseURL}/submitMove`;
 
   constructor(private httpClient: HttpClient) { }
 
-
-
-  // getGameList(): Observable<Game[]> {
-  //   return this.httpClient.get<GetResponse>(this.baseURL).pipe(
-  //     map(response => response._embedded.games)
-  //   );
-  // }
-}
-
-interface GetResponse {
-  _embedded: {
- //   games: Game[];
-    game: [];
+  createNewGame(): Observable<Number> {
+    return this.httpClient.post<Number>(this.createNewGameURL,null).pipe(
+    );
   }
+
+  getGameDetails(game_id: string): Observable<any> {
+    let myParams = new HttpParams().set("gameId",game_id); //Create new HttpParams
+    return this.httpClient.get<any>(this.getGameBoardURL, {params: myParams}).pipe(
+    );
+  }
+
+  submitmove(newMove: any): Observable<any> {
+    return this.httpClient.post<any>(this.submitMoveURL,newMove).pipe(
+    );
+  }
+
+
 }
+
