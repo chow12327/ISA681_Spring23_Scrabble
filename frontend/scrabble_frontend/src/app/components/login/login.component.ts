@@ -16,7 +16,7 @@ export class LoginComponent implements OnInit {
   invalidLogin = false
 
 
-  constructor(private router: Router, 
+  constructor(private router: Router,
     private basicAuthenticationService: BasicAuthenticationService) {
   }
 
@@ -30,7 +30,7 @@ export class LoginComponent implements OnInit {
           data => {
             console.log(data)
             this.router.navigate(['dashboard'])
-            this.invalidLogin = false      
+            this.invalidLogin = false
           },
           error => {
             console.log(error)

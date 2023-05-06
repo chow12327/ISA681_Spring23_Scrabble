@@ -34,8 +34,42 @@
   </table>
   </div>
 </div>
-<div class="col"></div>
-<div class="col"></div>
+<div class="col">
+    <div class="table-responsive-md">
+        <table class="table" >
+          <thead class="thead-dark">
+              <tr>
+                  <th>Game Id</th>
+                  <th></th>
+              </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let gm of histgames">
+                  <td>{{gm.id}}</td>
+                  <td><button (click)="startNewGame()" class="btn btn-success">View game</button></td>
+              </tr>
+          </tbody>
+      </table>
+    </div>
+</div>
+<div class="col">
+    <div class="table-responsive-md">
+        <table class="table">
+          <thead class="thead-dark">
+              <tr>
+                  <th>Game Id</th>
+                  <th></th>
+              </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let gma of activegames">
+                  <td>{{gma.id}}</td>
+                  <td><button (click)="startNewGame()" class="btn btn-success">Join game</button></td>
+              </tr>
+          </tbody>
+      </table>
+    </div>
+</div>
 </div>
 </div>
 
