@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Grid } from 'src/app/common/grid';
 import { InitializeGridService } from 'src/app/services/initialize-grid.service';
+import { BasicAuthenticationService } from 'src/app/services/basic-authentication.service';
 
 @Component({
   selector: 'app-game',
@@ -12,7 +13,7 @@ export class GameComponent implements OnInit{
 
   gameGrid: Grid;
   tagme: boolean = true
-  gameid: string = "123455"
+  gameid: string = history.state.data;
   player1: string = "user1"
   player2: string = "user2"
   score1: number = 10
@@ -26,6 +27,7 @@ export class GameComponent implements OnInit{
   
 
   constructor( private router: Router,
+    private basicAuthenticationService: BasicAuthenticationService,
     private initializeGridService: InitializeGridService) {
     const token = localStorage.getItem('token'); }
 
@@ -46,6 +48,11 @@ export class GameComponent implements OnInit{
         }
       }
     )
+  }
+  lgout(){
+    this.basicAuthenticationService.logout()
+    alert("you have successfully logged out")
+    this.router.navigate(['login'])
   }
   
 }

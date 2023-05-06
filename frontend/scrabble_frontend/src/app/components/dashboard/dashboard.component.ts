@@ -78,4 +78,17 @@ listHistoricGames(){
     this.router.navigate(['game'])
   }
 
+  ViewGame(gmid: number) {
+    this.router.navigate(['game'],{state:{data:gmid}})
+  }
+
+  JoinGame(gmid: number) {
+    this.router.navigate(['game'],{state:{data:gmid}})
+  }
+  lgout(){
+    this.basicAuthenticationService.logout()
+    alert("you have successfully logged out")
+    this.router.navigate(['login'])
+  }
+
 }
