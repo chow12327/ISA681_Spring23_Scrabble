@@ -85,4 +85,10 @@ public class GameController {
         return ResponseEntity.ok(playerLetters);
     }
 
+    @GetMapping("/api/gameBoardResponse")
+    public ResponseEntity<GameBoardResponse> getGameBoardResponse(@RequestParam Long gameId){
+        GameBoardResponse game = new GameBoardResponse();
+        return ResponseEntity.ok(game);
+    }
+
 }
