@@ -3,8 +3,9 @@ package com.isa681.scrabble.controller;
 import com.isa681.scrabble.Isa681Spring23ScrabbleApplication;
 import com.isa681.scrabble.entity.*;
 import com.isa681.scrabble.service.GameService;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,7 +18,7 @@ import java.util.List;
 @CrossOrigin(origins="https://localhost:4043")
 public class GameController {
 
-    private static final Logger myLogger = LogManager.getLogger(GameController.class);
+    Logger myLogger = LoggerFactory.getLogger(GameController.class);
 
     private GameService gameService;
 
@@ -88,6 +89,7 @@ public class GameController {
     @GetMapping("/api/gameBoardResponse")
     public ResponseEntity<GameBoardResponse> getGameBoardResponse(@RequestParam Long gameId){
         GameBoardResponse game = new GameBoardResponse();
+        myLogger.info("Info Hit gameboard");
         return ResponseEntity.ok(game);
     }
 

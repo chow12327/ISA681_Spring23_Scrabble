@@ -9,9 +9,8 @@ import com.isa681.scrabble.exceptions.InvalidMoveException;
 import com.isa681.scrabble.exceptions.ResourceCannotBeCreatedException;
 import com.isa681.scrabble.exceptions.UnauthorizedAccessException;
 import jakarta.transaction.Transactional;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.hibernate.sql.ast.tree.expression.Collation;
+import org.slf4j.Logger;
 import org.springframework.core.env.Environment;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -20,6 +19,9 @@ import java.security.SecureRandom;
 import java.sql.*;
 import java.util.*;
 
+import org.slf4j.LoggerFactory;
+
+
 import static java.sql.DriverManager.getConnection;
 import com.isa681.scrabble.controller.ValidationController;
 
@@ -27,8 +29,7 @@ import javax.xml.stream.events.Characters;
 
 @Service
 public class GameServiceImpl implements GameService {
-    private static final Logger myLogger = LogManager.getLogger(GameServiceImpl.class);
-
+    Logger myLogger = LoggerFactory.getLogger(GameServiceImpl.class);
     private GameRepository gameRepository;
     private GamePlayerRepository gamePlayerRepository;
     private GameMovesRepository gameMovesRepository;
@@ -244,7 +245,7 @@ public class GameServiceImpl implements GameService {
 
         gameMoves.forEach(y -> moveLocations.addAll(moveLocationRepository.getMoveLocationsByMlMove(y)) );
 
-        myLogger.info(moveLocations);
+        myLogger.info("Move locations: {}", Arrays.toString(moveLocations.toArray()));
         if(moveLocations.isEmpty())
         {return myGameGrid;}
         else
@@ -678,7 +679,7 @@ public class GameServiceImpl implements GameService {
         else {
             myLogger.info("1 character added to grid");
         }
-        myLogger.info(index);
+        myLogger.info("Index is ", index);
 
     }
 
@@ -782,6 +783,9 @@ public class GameServiceImpl implements GameService {
 //        while (resultSet.next()) {
 //
 //        }
+        //Test
+        myLogger.info("Info Hit gameboard");
+
         return game;
     }
 
