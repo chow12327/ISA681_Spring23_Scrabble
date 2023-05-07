@@ -34,10 +34,10 @@ public class GamePlayer {
     private Player player;
     @Column(name="isWinner")
     @Getter @Setter
-    private boolean isWinner;
+    private Boolean isWinner;
     @Column(name="isTurn")
     @Getter @Setter
-    private boolean isTurn;
+    private Boolean isTurn;
     @Column(name="createDate")
     @Getter @Setter
     @CreationTimestamp

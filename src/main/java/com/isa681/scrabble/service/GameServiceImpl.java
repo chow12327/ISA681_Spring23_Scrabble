@@ -7,14 +7,19 @@ import com.isa681.scrabble.exceptions.GameNotFoundException;
 import com.isa681.scrabble.exceptions.ResourceCannotBeCreatedException;
 import com.isa681.scrabble.exceptions.UnauthorizedAccessException;
 import jakarta.transaction.Transactional;
+import org.springframework.core.env.Environment;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+
+import static java.sql.DriverManager.getConnection;
+import com.isa681.scrabble.controller.ValidationController;
 
 @Service
 public class GameServiceImpl implements GameService {
@@ -28,11 +33,12 @@ public class GameServiceImpl implements GameService {
     private PlayerRepository playerRepository;
     private LetterRepository letterRepository;
     private SecureRandom rand;
+    private Connection connection;
 
-    public GameServiceImpl(GameRepository gameRepository, GamePlayerRepository gamePlayerRepository,
+    public GameServiceImpl(Environment environment, GameRepository gameRepository, GamePlayerRepository gamePlayerRepository,
                            GameMovesRepository gameMovesRepository, MoveLocationRepository moveLocationRepository,
                            MoveWordsRepository moveWordsRepository, PlayerLettersRepository playerLettersRepository,
-                           PlayerRepository playerRepository, LetterRepository letterRepository) {
+                           PlayerRepository playerRepository, LetterRepository letterRepository) throws SQLException {
         this.gameRepository = gameRepository;
         this.gamePlayerRepository = gamePlayerRepository;
         this.gameMovesRepository = gameMovesRepository;
@@ -42,6 +48,10 @@ public class GameServiceImpl implements GameService {
         this.playerRepository = playerRepository;
         this.letterRepository = letterRepository;
         this.rand =  new SecureRandom();
+        String url = environment.getProperty("spring.datasource.url");
+        String username = environment.getProperty("spring.datasource.username");
+        String password = environment.getProperty("spring.datasource.password");
+        connection = DriverManager.getConnection(url, username, password);
     }
 
 
@@ -58,8 +68,8 @@ public class GameServiceImpl implements GameService {
             myPlayer = playerRepository.findByUserName(username);
 
             myGamePlayer.setPlayer(myPlayer);
-            myGamePlayer.setTurn(true);
-            myGamePlayer.setWinner(false);
+            myGamePlayer.setIsTurn(true);
+            myGamePlayer.setIsWinner(false);
 
             myGame.setIsFinished(false);
             myGame.setIsDraw(false);
@@ -96,8 +106,8 @@ public class GameServiceImpl implements GameService {
         if(myGamePlayers!=null && myGamePlayers.size() <= 1 ){
             myPlayer = playerRepository.findByUserName(username);
             newGamePlayer.setPlayer(myPlayer);
-            newGamePlayer.setTurn(false);
-            newGamePlayer.setWinner(false);
+            newGamePlayer.setIsTurn(false);
+            newGamePlayer.setIsWinner(false);
             newGamePlayer.setGame(myGame);
         }
         else
@@ -240,6 +250,22 @@ public class GameServiceImpl implements GameService {
 //
 //        return myGame;
 
+    }
+
+    @Override
+    public GameBoardResponse getGameBoard(Long gameId) throws SQLException {
+        GameBoardResponse game = new GameBoardResponse();
+        ValidationController.validateGameId(gameId);
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        List<PlayerLetter> playerLetters = getLettersforPlayer(gameId,username);
+        game.setL1(playerLetters.get(0).getPlLetter().getAlphabet());
+//        String sql = "SELECT * FROM game where is_finished = true";
+//        PreparedStatement statement = connection.prepareStatement(sql);
+//        ResultSet resultSet = statement.executeQuery();
+//        while (resultSet.next()) {
+//
+//        }
+        return game;
     }
 
 }
