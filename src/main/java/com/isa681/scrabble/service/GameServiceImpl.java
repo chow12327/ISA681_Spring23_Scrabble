@@ -1,12 +1,15 @@
 package com.isa681.scrabble.service;
 
 
+import com.isa681.scrabble.controller.GameController;
 import com.isa681.scrabble.dao.*;
 import com.isa681.scrabble.entity.*;
 import com.isa681.scrabble.exceptions.GameNotFoundException;
 import com.isa681.scrabble.exceptions.ResourceCannotBeCreatedException;
 import com.isa681.scrabble.exceptions.UnauthorizedAccessException;
 import jakarta.transaction.Transactional;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.core.env.Environment;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -23,6 +26,7 @@ import com.isa681.scrabble.controller.ValidationController;
 
 @Service
 public class GameServiceImpl implements GameService {
+    private static final Logger myLogger = LogManager.getLogger(GameServiceImpl.class);
 
     private GameRepository gameRepository;
     private GamePlayerRepository gamePlayerRepository;
@@ -101,7 +105,7 @@ public class GameServiceImpl implements GameService {
 
         myGamePlayers = gamePlayerRepository.findGamePlayersByGame(myGame);
 
-        //TODO : Check for user already in GamePlayer, then just redirect to the game page. Do not add again.
+
         if(myGamePlayers!= null)
         {
             myGamePlayers.forEach((x) -> {
@@ -229,15 +233,181 @@ public class GameServiceImpl implements GameService {
         return myGame;
     }
 
+    private GameGrid getGameGridFromGameId(Long gameId){
+        GameGrid myGameGrid = new GameGrid();
+        List<GamePlayer> myGamePlayers = gamePlayerRepository.findGamePlayersByGameId(gameId);
+        List<GameMove> gameMoves = new ArrayList<>();
+        List<MoveLocation> moveLocations = new ArrayList<>();
+
+        myGamePlayers.forEach(x -> gameMoves.addAll(gameMovesRepository.getGameMovesByMovePlayer(x)));
+
+        gameMoves.forEach(y -> moveLocations.addAll(moveLocationRepository.getMoveLocationsByMlMove(y)) );
+
+        myLogger.info(moveLocations);
+        if(moveLocations.isEmpty())
+        {return myGameGrid;}
+        else
+        {
+            moveLocations.forEach(z -> {
+                if (z != null) {
+                    int i;
+                    i = z.getMlGridIndex().getId().intValue();
+                    switch(i)
+                    {
+                        case 1:
+                            myGameGrid.setG1(z.getMlLetter().getAlphabet());
+                            break; 
+
+                        case 2 :
+                            myGameGrid.setG2(z.getMlLetter().getAlphabet());
+                            break; 
+
+                        case 3 :
+                            myGameGrid.setG3(z.getMlLetter().getAlphabet());
+                            break; 
+
+                        case 4 :
+                            myGameGrid.setG4(z.getMlLetter().getAlphabet());
+                            break; 
+                        case 5 :
+                            myGameGrid.setG5(z.getMlLetter().getAlphabet());
+                            break; 
+                        case 6 :
+                            myGameGrid.setG6(z.getMlLetter().getAlphabet());
+                            break; 
+                        case 7 :
+                            myGameGrid.setG7(z.getMlLetter().getAlphabet());
+                            break; 
+                        case 8 :
+                            myGameGrid.setG8(z.getMlLetter().getAlphabet());
+                            break; 
+                        case 9 :
+                            myGameGrid.setG9(z.getMlLetter().getAlphabet());
+                            break; 
+                        case 10 :
+                            myGameGrid.setG10(z.getMlLetter().getAlphabet());
+                            break; 
+                        case 11 :
+                            myGameGrid.setG11(z.getMlLetter().getAlphabet());
+                            break; 
+                        case 12 :
+                            myGameGrid.setG12(z.getMlLetter().getAlphabet());
+                            break; 
+                        case 13 :
+                            myGameGrid.setG13(z.getMlLetter().getAlphabet());
+                            break; 
+                        case 14 :
+                            myGameGrid.setG14(z.getMlLetter().getAlphabet());
+                            break; 
+                        case 15 :
+                            myGameGrid.setG15(z.getMlLetter().getAlphabet());
+                            break; 
+                        case 16 :
+                            myGameGrid.setG16(z.getMlLetter().getAlphabet());
+                            break; 
+                        case 17 :
+                            myGameGrid.setG17(z.getMlLetter().getAlphabet());
+                            break; 
+                        case 18 :
+                            myGameGrid.setG18(z.getMlLetter().getAlphabet());
+                            break; 
+                        case 19 :
+                            myGameGrid.setG19(z.getMlLetter().getAlphabet());
+                            break; 
+                        case 20 :
+                            myGameGrid.setG20(z.getMlLetter().getAlphabet());
+                            break; 
+                        case 21 :
+                            myGameGrid.setG21(z.getMlLetter().getAlphabet());
+                            break; 
+                        case 22 :
+                            myGameGrid.setG22(z.getMlLetter().getAlphabet());
+                            break; 
+                        case 23 :
+                            myGameGrid.setG23(z.getMlLetter().getAlphabet());
+                            break; 
+                        case 24 :
+                            myGameGrid.setG24(z.getMlLetter().getAlphabet());
+                            break; 
+                        case 25 :
+                            myGameGrid.setG25(z.getMlLetter().getAlphabet());
+                            break; 
+                        case 26 :
+                            myGameGrid.setG26(z.getMlLetter().getAlphabet());
+                            break; 
+                        case 27 :
+                            myGameGrid.setG27(z.getMlLetter().getAlphabet());
+                            break; 
+                        case 28 :
+                            myGameGrid.setG28(z.getMlLetter().getAlphabet());
+                            break; 
+                        case 29 :
+                            myGameGrid.setG29(z.getMlLetter().getAlphabet());
+                            break; 
+                        case 30 :
+                            myGameGrid.setG30(z.getMlLetter().getAlphabet());
+                            break; 
+                        case 31 :
+                            myGameGrid.setG31(z.getMlLetter().getAlphabet());
+                            break; 
+                        case 32 :
+                            myGameGrid.setG32(z.getMlLetter().getAlphabet());
+                            break; 
+                        case 33 :
+                            myGameGrid.setG33(z.getMlLetter().getAlphabet());
+                            break; 
+                        case 34 :
+                            myGameGrid.setG34(z.getMlLetter().getAlphabet());
+                            break; 
+                        case 35 :
+                            myGameGrid.setG35(z.getMlLetter().getAlphabet());
+                            break; 
+                        case 36 :
+                            myGameGrid.setG36(z.getMlLetter().getAlphabet());
+                            break;
+                    }
+                }
+            });
+
+            return myGameGrid;
+        }
+    }
+
     @Override
     public void submitMove(GameGrid myGamegrid, Long gameId, String username){
 
         GamePlayer myGamePlayer;
+        GameGrid dbGameGrid;
 
         myGamePlayer = getGamePlayerFromUsername(username,gameId);
 
         if(Objects.isNull(myGamePlayer))
         {throw new UnauthorizedAccessException("User not a player in this game");}
+        else
+        {
+            if (!myGamePlayer.getIsTurn()){
+            throw new UnauthorizedAccessException("It's not your turn!");}
+        }
+        dbGameGrid = getGameGridFromGameId(gameId);
+
+
+        //TODO: //DONE get gameplayer from user, gameid - throw exception is user not in game
+        //TODO: //DONE check if it is game player's turn
+        //TODO: //DONE get game state - grid from DB
+        //TODO: find what letters are new
+        //TODO: validate no grid index is overwritten
+        //TODO: get gameplayer letters. validate if letters played are with player
+        //TODO: check if atleast one letter is next to an already placed letter
+        //TODO: get word(s) played
+        //TODO: check if words in dictionary https://api.dictionaryapi.dev/api/v2/entries/en/<word>
+        //TODO: add new move entry
+        //TODO: add new move location
+        //TODO: add new move words
+        //TODO: Update score
+        //TODO: validate if game is over
+        //TODO: update win/loss/draw is game is over
+
+
 //
 //
 //
