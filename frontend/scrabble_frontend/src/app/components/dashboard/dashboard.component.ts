@@ -95,13 +95,27 @@ export class DashboardComponent implements OnInit {
     )
   }
 
-  ViewGame(gmid: number) {
-    this.router.navigate(['game'],{state:{data:gmid}})
-  }
-
   JoinGame(gmid: number) {
     this.router.navigate(['game'],{state:{data:gmid}})
+
+    this.gameService.joinGame(gmid.toString()).subscribe(
+      data => {
+          this.router.navigate(['game',gmid])
+      },
+      error => {
+        if (error.status === 401) {
+          this.basicAuthenticationService.logout();
+          this.router.navigate(['login']);
+        }
+      }
+    )
+
   }
+
+  ViewGame(gmid: number) {
+    this.router.navigate(['game',gmid])
+  }
+
   lgout(){
     this.basicAuthenticationService.logout()
     alert("you have successfully logged out")

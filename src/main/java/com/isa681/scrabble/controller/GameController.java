@@ -66,7 +66,7 @@ public class GameController {
     }
 
 
-    // @GetMapping("/api/playerLetters")
+    @GetMapping("/api/playerLetters")
     public ResponseEntity<List<PlayerLetter>> getPlayerLetters(@RequestParam Long gameId){
 
         ValidationController.validateGameId(gameId);

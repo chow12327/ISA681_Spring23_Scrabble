@@ -102,6 +102,14 @@ public class GameServiceImpl implements GameService {
         myGamePlayers = gamePlayerRepository.findGamePlayersByGame(myGame);
 
         //TODO : Check for user already in GamePlayer, then just redirect to the game page. Do not add again.
+        if(myGamePlayers!= null)
+        {
+            myGamePlayers.forEach((x) -> {
+                if (x.getPlayer().getUserName() == username) {
+                    return;
+                }
+            });
+        }
 
         if(myGamePlayers!=null && myGamePlayers.size() <= 1 ){
             myPlayer = playerRepository.findByUserName(username);
@@ -112,7 +120,7 @@ public class GameServiceImpl implements GameService {
         }
         else
         {
-            throw new UnauthorizedAccessException("game");
+            throw new UnauthorizedAccessException("You are not part of this game and no more players can be added.");
         }
 
         try {
@@ -149,7 +157,7 @@ public class GameServiceImpl implements GameService {
         myGamePlayers.forEach((x) -> players.add(x.getPlayer()));
 
 
-        if (myGame.isFinished() == false && !players.contains(myPlayer))
+        if (myGame.getIsFinished() == false && !players.contains(myPlayer))
         {
             throw new UnauthorizedAccessException("game");
         }
@@ -169,17 +177,18 @@ public class GameServiceImpl implements GameService {
 
         if (playerLetters.isEmpty() || playerLetters.size() < 5){
             do{
+                Letter newLetter = getLetter();
                 PlayerLetter newPlayerLetter = new PlayerLetter();
-                newPlayerLetter.setPlLetter(getLetter());
+                newPlayerLetter.setPlLetter(newLetter);
                 newPlayerLetter.setPlGamePlayer(myGamePlayer);
                 newPlayerLetter.setUsed(false);
-                //playerLetters.add(newPlayerLetter);
-                playerLettersRepository.saveAndFlush(newPlayerLetter);
+                playerLetters.add(newPlayerLetter);
+
             }
             while (playerLetters.size()<5);
         }
 
-
+        playerLettersRepository.saveAllAndFlush(playerLetters);
 
         return playerLetters;
 

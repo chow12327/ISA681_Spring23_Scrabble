@@ -30,14 +30,14 @@ public class PlayerLetter {
     @Getter @Setter
     private GamePlayer plGamePlayer;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "letterID")
     @Getter @Setter
     private Letter plLetter;
 
     @Column(name="isUsed")
     @Getter @Setter
-    private boolean used;
+    private Boolean used;
 
     @Column(name="createDate")
     @Getter @Setter

@@ -11,6 +11,7 @@ export class GameService {
 
   private baseURL = `${API_URL}/api`;
   private createNewGameURL = `${this.baseURL}/creategame`;
+  private joinGameURL = `${this.baseURL}/joinGame`;
   private getGameBoardURL = `${this.baseURL}/gamedetails`;
   private submitMoveURL = `${this.baseURL}/submitMove`;
 
@@ -18,6 +19,12 @@ export class GameService {
 
   createNewGame(): Observable<Number> {
     return this.httpClient.post<Number>(this.createNewGameURL,null).pipe(
+    );
+  }
+
+  joinGame(game_id: string): Observable<Number> {
+    let myParams = new HttpParams().set("gameId",game_id);
+    return this.httpClient.post<Number>(this.joinGameURL,'',{params: myParams}).pipe(
     );
   }
 

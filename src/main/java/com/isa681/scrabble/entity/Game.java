@@ -25,10 +25,10 @@ public class Game {
     private Long id;
     @Column(name="isFinished")
     @Getter @Setter
-    private boolean isFinished;
+    private Boolean isFinished;
     @Column(name="isDraw")
     @Getter @Setter
-    private boolean isDraw;
+    private Boolean isDraw;
     @Column(name="createDate")
     @CreationTimestamp
     @Getter @Setter

@@ -9,6 +9,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name="letters")
@@ -44,7 +45,7 @@ public class Letter {
     @OneToOne(mappedBy = "mlLetter")
     private MoveLocation moveLocation;
 
-    @OneToOne(mappedBy = "plLetter")
-    private PlayerLetter playerLetter;
+    @OneToMany(mappedBy = "plLetter")
+    private List<PlayerLetter> playerLetter;
 }
 

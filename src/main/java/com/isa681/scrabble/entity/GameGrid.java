@@ -80,77 +80,77 @@ public class GameGrid {
 
 
     @Getter 
-    private boolean isg1Disabled;
+    private Boolean isg1Disabled;
     @Getter 
-    private boolean isg2Disabled;
+    private Boolean isg2Disabled;
     @Getter 
-    private boolean isg3Disabled;
+    private Boolean isg3Disabled;
     @Getter 
-    private boolean isg4Disabled;
+    private Boolean isg4Disabled;
     @Getter 
-    private boolean isg5Disabled;
+    private Boolean isg5Disabled;
     @Getter 
-    private boolean isg6Disabled;
+    private Boolean isg6Disabled;
     @Getter 
-    private boolean isg7Disabled;
+    private Boolean isg7Disabled;
     @Getter 
-    private boolean isg8Disabled;
+    private Boolean isg8Disabled;
     @Getter 
-    private boolean isg9Disabled;
+    private Boolean isg9Disabled;
     @Getter 
-    private boolean isg10Disabled;
+    private Boolean isg10Disabled;
     @Getter 
-    private boolean isg11Disabled;
+    private Boolean isg11Disabled;
     @Getter 
-    private boolean isg12Disabled;
+    private Boolean isg12Disabled;
     @Getter 
-    private boolean isg13Disabled;
+    private Boolean isg13Disabled;
     @Getter 
-    private boolean isg14Disabled;
+    private Boolean isg14Disabled;
     @Getter 
-    private boolean isg15Disabled;
+    private Boolean isg15Disabled;
     @Getter 
-    private boolean isg16Disabled;
+    private Boolean isg16Disabled;
     @Getter 
-    private boolean isg17Disabled;
+    private Boolean isg17Disabled;
     @Getter 
-    private boolean isg18Disabled;
+    private Boolean isg18Disabled;
     @Getter 
-    private boolean isg19Disabled;
+    private Boolean isg19Disabled;
     @Getter 
-    private boolean isg20Disabled;
+    private Boolean isg20Disabled;
     @Getter 
-    private boolean isg21Disabled;
+    private Boolean isg21Disabled;
     @Getter 
-    private boolean isg22Disabled;
+    private Boolean isg22Disabled;
     @Getter 
-    private boolean isg23Disabled;
+    private Boolean isg23Disabled;
     @Getter 
-    private boolean isg24Disabled;
+    private Boolean isg24Disabled;
     @Getter 
-    private boolean isg25Disabled;
+    private Boolean isg25Disabled;
     @Getter 
-    private boolean isg26Disabled;
+    private Boolean isg26Disabled;
     @Getter 
-    private boolean isg27Disabled;
+    private Boolean isg27Disabled;
     @Getter 
-    private boolean isg28Disabled;
+    private Boolean isg28Disabled;
     @Getter 
-    private boolean isg29Disabled;
+    private Boolean isg29Disabled;
     @Getter 
-    private boolean isg30Disabled;
+    private Boolean isg30Disabled;
     @Getter 
-    private boolean isg31Disabled;
+    private Boolean isg31Disabled;
     @Getter 
-    private boolean isg32Disabled;
+    private Boolean isg32Disabled;
     @Getter 
-    private boolean isg33Disabled;
+    private Boolean isg33Disabled;
     @Getter 
-    private boolean isg34Disabled;
+    private Boolean isg34Disabled;
     @Getter 
-    private boolean isg35Disabled;
+    private Boolean isg35Disabled;
     @Getter 
-    private boolean isg36Disabled;
+    private Boolean isg36Disabled;
 
 
     public void setG1(Character g1) {
