@@ -1,7 +1,10 @@
 package com.isa681.scrabble.controller;
 
+import com.isa681.scrabble.Isa681Spring23ScrabbleApplication;
 import com.isa681.scrabble.entity.*;
 import com.isa681.scrabble.service.GameService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -14,6 +17,8 @@ import java.util.List;
 @CrossOrigin(origins="https://localhost:4043")
 public class GameController {
 
+    private static final Logger myLogger = LogManager.getLogger(GameController.class);
+
     private GameService gameService;
 
     public GameController(GameService gameService) {
@@ -23,7 +28,7 @@ public class GameController {
     @PostMapping("/api/creategame")
     public ResponseEntity<Long> createGame(){
         Game myGame;
-
+        myLogger.info("Request received to create Game");
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
 
         myGame = gameService.createNewGame(username);
@@ -32,6 +37,7 @@ public class GameController {
 
     @PostMapping("/api/joinGame")
     public void joinGame(@RequestParam Long gameId){
+        myLogger.info("Request received to Join Game: " +gameId);
         ValidationController.validateGameId(gameId);
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         gameService.joinGame(gameId,username);

@@ -96,8 +96,6 @@ export class DashboardComponent implements OnInit {
   }
 
   JoinGame(gmid: number) {
-    this.router.navigate(['game'],{state:{data:gmid}})
-
     this.gameService.joinGame(gmid.toString()).subscribe(
       data => {
           this.router.navigate(['game',gmid])
