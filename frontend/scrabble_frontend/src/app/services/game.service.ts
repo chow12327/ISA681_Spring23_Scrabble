@@ -12,7 +12,7 @@ export class GameService {
   private baseURL = `${API_URL}/api`;
   private createNewGameURL = `${this.baseURL}/creategame`;
   private joinGameURL = `${this.baseURL}/joinGame`;
-  private getGameBoardURL = `${this.baseURL}/gamedetails`;
+  private getGameBoardURL = `${this.baseURL}/gameDetails`;
   private submitMoveURL = `${this.baseURL}/submitMove`;
 
   constructor(private httpClient: HttpClient) { }

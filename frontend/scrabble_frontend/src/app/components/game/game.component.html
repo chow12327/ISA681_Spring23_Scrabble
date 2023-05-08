@@ -172,7 +172,11 @@
             <div class="alert alert-danger" *ngIf="moveError">
                 {{moveErrorMessage}}
             </div>
+            <div class="alert alert-success" *ngIf="moveSuccess">
+                {{moveSuccessMessage}}
+            </div>
         </div>
+     
 
         <div class="col-md-3 offset-md-2">
             <div class="row">
@@ -200,10 +204,10 @@
     </div>
 
 
-    <div class="row">
+    <div class="row mt-3 ml-2">
         <div class="col-md-3">
             <div class="row">
-                <label class="col col-form-label">Your Letters</label>
+                <label class="col col-form-label font-weight-bold">Your Letters</label>
             </div>
             <div class="row">
                 <label class="col col-form-label">{{letter1}}</label>
@@ -216,7 +220,7 @@
     </div>
 
 
-    <div class="row">
+    <div class="row mt-5 ml-4">
         <div class="col-md-3">
             <div class="row">
                 <button (click)=submitMove() class="btn btn-success">Submit</button>

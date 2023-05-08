@@ -1162,6 +1162,7 @@ public class GameServiceImpl implements GameService {
         //TODO: //Done add new move location
         //TODO: //Done add new move words
         //TODO: //Done Update score
+        //TODO: Set letter to used
         //TODO: Update turn
         //TODO: validate if game is over
         //TODO: update win/loss/draw is game is over
@@ -1207,8 +1208,8 @@ public class GameServiceImpl implements GameService {
         myPlayer = playerRepository.findByUserName(username);
         myGame = getGameFromGameId(gameId);
         myGamePlayers = gamePlayerRepository.findGamePlayersByGame(myGame);
-        List<GameMove> player1moves;
-        List<GameMove> player2moves;
+        List<GameMove> player1moves = new ArrayList<>();
+        List<GameMove> player2moves =  new ArrayList<>();
         List<MoveResponse> gameMovesResponse =  new ArrayList<>();
         GameGrid gameGrid =  new GameGrid();
 
@@ -1228,8 +1229,12 @@ public class GameServiceImpl implements GameService {
         else
         {
             //Get player scores
-            player1moves= myGamePlayers.get(0).getGameMoves();
-            player2moves= myGamePlayers.get(1).getGameMoves();
+            if(myGamePlayers.size()>0 && myGamePlayers.get(0)!=null) {
+                player1moves = myGamePlayers.get(0).getGameMoves();
+            }
+            if(myGamePlayers.size()>1 && myGamePlayers.get(1)!=null) {
+                player2moves = myGamePlayers.get(1).getGameMoves();
+            }
 
             int i;
             if (player1moves!=null && player1moves.size()>0)
@@ -1290,11 +1295,15 @@ public class GameServiceImpl implements GameService {
 
             //SetGameBoard
             gameBoardResponse.setId(gameId);
-            gameBoardResponse.setPlayer1Username(players.get(0).getUserName());
-            gameBoardResponse.setPlayer2Username(players.get(1).getUserName());
-
-            gameBoardResponse.setPlayer1Score(player1Score);
-            gameBoardResponse.setPlayer2Score(player2Score);
+            if(players.get(0)!=null) {
+                gameBoardResponse.setPlayer1Username(players.get(0).getUserName());
+                gameBoardResponse.setPlayer1Score(player1Score);
+            }
+            if(players.size()>1 && players.get(1)!=null)
+            {
+                gameBoardResponse.setPlayer2Username(players.get(1).getUserName());
+                gameBoardResponse.setPlayer2Score(player2Score);
+            }
 
             gameBoardResponse.setMoves(gameMovesResponse);
 
