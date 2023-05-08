@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.Date;
 
@@ -71,12 +72,19 @@ public class GlobalExceptionHandler {
     @ResponseBody
     public ResponseEntity<ErrorDetail> handleHttpMessageNotReadableException(Exception exception,
                                                              WebRequest webRequest){
-        ErrorDetail errorDetails = new ErrorDetail(new Date(), "An Invalid character was entered.",
+        ErrorDetail errorDetails = new ErrorDetail(new Date(), "Invalid data was entered.",
                 webRequest.getDescription(false));
         return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
     }
 
-
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    @ResponseBody
+    public ResponseEntity<ErrorDetail> handleMethodArgumentTypeMismatchException(Exception exception,
+                                                                             WebRequest webRequest){
+        ErrorDetail errorDetails = new ErrorDetail(new Date(), "Invalid data was entered.",
+                webRequest.getDescription(false));
+        return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
+    }
     // global exceptions
     @ExceptionHandler(Exception.class)
     @ResponseBody

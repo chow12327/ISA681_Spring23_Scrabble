@@ -4,7 +4,7 @@ public class UnauthorizedAccessException extends RuntimeException{
     private String objectName;
 
     public UnauthorizedAccessException(String objectName) {
-        super(String.format("Sorry, you're not authorized to this %s", objectName));
+        super(String.format("%s", objectName));
         this.objectName = objectName;
     }
 }

@@ -113,39 +113,37 @@ public class GameServiceImpl implements GameService {
         GamePlayer newGamePlayer = new GamePlayer();
 
         myGame = getGameFromGameId(gameId);
+        boolean playerInGame = false;
 
         myGamePlayers = gamePlayerRepository.findGamePlayersByGame(myGame);
 
 
-        if(myGamePlayers!= null)
-        {
-            myGamePlayers.forEach((x) -> {
-                if (x.getPlayer().getUserName() == username) {
-                    return;
+        if(myGamePlayers!= null) {
+            for (GamePlayer gmPlayer : myGamePlayers) {
+                if (gmPlayer.getPlayer().getUserName().equals(username)) {
+                    playerInGame = true;
+                    myLogger.info("Player already in game. Providing Access");
                 }
-            });
+            }
+            if (!playerInGame) {
+                if (myGamePlayers != null && myGamePlayers.size() <= 1) {
+                    myPlayer = playerRepository.findByUserName(username);
+                    newGamePlayer.setPlayer(myPlayer);
+                    newGamePlayer.setIsTurn(false);
+                    newGamePlayer.setIsWinner(false);
+                    newGamePlayer.setGame(myGame);
+                    try {
+                        gamePlayerRepository.save(newGamePlayer);
+                    } catch (Exception e) {
+                        throw new ResourceCannotBeCreatedException("Game Player");
+                    }
+                }
+                else
+                {
+                    throw new UnauthorizedAccessException("You are not part of this game and no more players can be added.");
+                }
+            }
         }
-
-        if(myGamePlayers!=null && myGamePlayers.size() <= 1 ){
-            myPlayer = playerRepository.findByUserName(username);
-            newGamePlayer.setPlayer(myPlayer);
-            newGamePlayer.setIsTurn(false);
-            newGamePlayer.setIsWinner(false);
-            newGamePlayer.setGame(myGame);
-        }
-        else
-        {
-            throw new UnauthorizedAccessException("You are not part of this game and no more players can be added.");
-        }
-
-        try {
-            gamePlayerRepository.save(newGamePlayer);
-        }
-        catch (Exception e)
-        {
-            throw new ResourceCannotBeCreatedException("Game Player");
-        }
-
     }
 
 

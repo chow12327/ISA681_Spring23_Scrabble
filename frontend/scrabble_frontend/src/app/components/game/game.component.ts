@@ -104,18 +104,17 @@ export class GameComponent implements OnInit{
         // }
       },
       error => {
-        this.moveError = true
         
-        if (error.status == 401) {
+        if (error.status == 401 ||  error.status == 0) {
           this.basicAuthenticationService.logout();
           this.router.navigate(['login']);
         }
         if (error.status == 400 ){
-          //console.log("Invalid Move");
+          this.moveError = true
           this.moveErrorMessage = error.error.message;
         }
         if (error.status == 500 ){
-          //console.log("Invalid Move");
+          this.moveError = true
           this.moveErrorMessage = error.error.message;
         }
       }

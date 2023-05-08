@@ -24,6 +24,10 @@ export class DashboardComponent implements OnInit {
   histgames: Histgame[] = [];
   activegames: Histgame[] = [];
 
+  moveError: boolean = false
+  moveErrorMessage: string
+
+
   constructor(private playerService: PlayerService,
     private histgamesService: HistgamesService,
     private gameService: GameService,
@@ -45,7 +49,7 @@ export class DashboardComponent implements OnInit {
         this.players = data;
       },
       error => {
-        if (error.status === 401) {
+        if (error.status == 401 || error.status == 0) {
           this.basicAuthenticationService.logout();
           this.router.navigate(['login']);
         }
@@ -59,7 +63,7 @@ export class DashboardComponent implements OnInit {
         this.activegames = data;
       },
       error => {
-        if (error.status == 401) {
+        if (error.status == 401 || error.status == 0) {
           this.basicAuthenticationService.logout();
           this.router.navigate(['login']);
         }
@@ -73,7 +77,7 @@ export class DashboardComponent implements OnInit {
         this.histgames = data;
       },
       error => {
-        if (error.status == 401) {
+        if (error.status == 401 || error.status == 0) {
           this.basicAuthenticationService.logout();
           this.router.navigate(['login']);
         }
@@ -91,7 +95,7 @@ export class DashboardComponent implements OnInit {
         }
       },
       error => {
-        if (error.status === 401) {
+        if (error.status == 401 || error.status == 0) {
           this.basicAuthenticationService.logout();
           this.router.navigate(['login']);
         }
@@ -105,9 +109,17 @@ export class DashboardComponent implements OnInit {
           this.router.navigate(['game',gmid])
       },
       error => {
-        if (error.status === 401) {
+        if (error.status == 401 || error.status == 0) {
           this.basicAuthenticationService.logout();
           this.router.navigate(['login']);
+        }
+        if(error.status == 400){
+          this.moveError = true
+          this.moveErrorMessage = error.error.message;
+        }
+        if(error.status == 500){
+          this.moveError = true
+          this.moveErrorMessage = error.error.message;
         }
       }
     )
@@ -123,7 +135,7 @@ export class DashboardComponent implements OnInit {
     if(this.game.gmid!=null){
       gmidstr = this.game.gmid+"";
     }
-    this.ViewGame(gmidstr);
+    this.JoinGame(gmidstr);
   }
 
   lgout(){
