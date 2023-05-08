@@ -1,0 +1,65 @@
+2023-05-08 01:17:08,597 INFO org.springframework.boot.StartupInfoLogger [restartedMain] Starting Isa681Spring23ScrabbleApplication using Java 19.0.2 with PID 63921 (/Users/nidhichowdhry/gitRepositories/ISA681_Spring23_Scrabble/target/classes started by nidhichowdhry in /Users/nidhichowdhry/gitRepositories/ISA681_Spring23_Scrabble)
+2023-05-08 01:17:08,598 INFO org.springframework.boot.SpringApplication [restartedMain] No active profile set, falling back to 1 default profile: "default"
+2023-05-08 01:17:08,768 INFO org.springframework.data.repository.config.RepositoryConfigurationDelegate [restartedMain] Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2023-05-08 01:17:08,794 INFO org.springframework.data.repository.config.RepositoryConfigurationDelegate [restartedMain] Finished Spring Data repository scanning in 25 ms. Found 9 JPA repository interfaces.
+2023-05-08 01:17:08,937 INFO org.springframework.boot.web.embedded.tomcat.TomcatWebServer [restartedMain] Tomcat initialized with port(s): 9443 (https)
+2023-05-08 01:17:08,937 INFO org.apache.juli.logging.DirectJDKLog [restartedMain] Starting service [Tomcat]
+2023-05-08 01:17:08,937 INFO org.apache.juli.logging.DirectJDKLog [restartedMain] Starting Servlet engine: [Apache Tomcat/10.1.8]
+2023-05-08 01:17:08,945 INFO org.apache.juli.logging.DirectJDKLog [restartedMain] Initializing Spring embedded WebApplicationContext
+2023-05-08 01:17:08,945 INFO org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext [restartedMain] Root WebApplicationContext: initialization completed in 345 ms
+2023-05-08 01:17:09,101 INFO com.zaxxer.hikari.HikariDataSource [restartedMain] HikariPool-7 - Starting...
+2023-05-08 01:17:09,108 INFO com.zaxxer.hikari.pool.HikariPool [restartedMain] HikariPool-7 - Added connection com.mysql.cj.jdbc.ConnectionImpl@58673370
+2023-05-08 01:17:09,108 INFO com.zaxxer.hikari.HikariDataSource [restartedMain] HikariPool-7 - Start completed.
+2023-05-08 01:17:09,109 INFO org.hibernate.jpa.internal.util.LogHelper [restartedMain] HHH000204: Processing PersistenceUnitInfo [name: default]
+2023-05-08 01:17:09,115 INFO org.hibernate.engine.jdbc.dialect.internal.DialectFactoryImpl [restartedMain] HHH000400: Using dialect: org.hibernate.dialect.MySQLDialect
+2023-05-08 01:17:09,325 INFO org.hibernate.engine.transaction.jta.platform.internal.JtaPlatformInitiator [restartedMain] HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform]
+2023-05-08 01:17:09,326 INFO org.springframework.orm.jpa.AbstractEntityManagerFactoryBean [restartedMain] Initialized JPA EntityManagerFactory for persistence unit 'default'
+2023-05-08 01:17:09,582 WARN org.springframework.context.support.AbstractApplicationContext [restartedMain] Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'gameController' defined in file [/Users/nidhichowdhry/gitRepositories/ISA681_Spring23_Scrabble/target/classes/com/isa681/scrabble/controller/GameController.class]: Unsatisfied dependency expressed through constructor parameter 0: No qualifying bean of type 'com.isa681.scrabble.service.GameService' available: expected at least 1 bean which qualifies as autowire candidate. Dependency annotations: {}
+2023-05-08 01:17:09,582 INFO org.springframework.orm.jpa.AbstractEntityManagerFactoryBean [restartedMain] Closing JPA EntityManagerFactory for persistence unit 'default'
+2023-05-08 01:17:09,583 INFO com.zaxxer.hikari.HikariDataSource [restartedMain] HikariPool-7 - Shutdown initiated...
+2023-05-08 01:17:09,586 INFO com.zaxxer.hikari.HikariDataSource [restartedMain] HikariPool-7 - Shutdown completed.
+2023-05-08 01:17:09,586 INFO org.apache.juli.logging.DirectJDKLog [restartedMain] Stopping service [Tomcat]
+2023-05-08 01:17:09,596 INFO org.springframework.boot.autoconfigure.logging.ConditionEvaluationReportLogger [restartedMain] 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2023-05-08 01:17:09,896 ERROR org.springframework.boot.diagnostics.LoggingFailureAnalysisReporter [restartedMain] 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Parameter 0 of constructor in com.isa681.scrabble.controller.GameController required a bean of type 'com.isa681.scrabble.service.GameService' that could not be found.
+
+
+Action:
+
+Consider defining a bean of type 'com.isa681.scrabble.service.GameService' in your configuration.
+
+2023-05-08 01:21:05,926 INFO org.springframework.boot.StartupInfoLogger [restartedMain] Starting Isa681Spring23ScrabbleApplication using Java 19.0.2 with PID 64348 (/Users/nidhichowdhry/gitRepositories/ISA681_Spring23_Scrabble/target/classes started by nidhichowdhry in /Users/nidhichowdhry/gitRepositories/ISA681_Spring23_Scrabble)
+2023-05-08 01:21:05,929 INFO org.springframework.boot.SpringApplication [restartedMain] No active profile set, falling back to 1 default profile: "default"
+2023-05-08 01:21:06,087 INFO org.springframework.boot.logging.DeferredLog [restartedMain] Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2023-05-08 01:21:06,087 INFO org.springframework.boot.logging.DeferredLog [restartedMain] For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2023-05-08 01:21:06,697 INFO org.springframework.data.repository.config.RepositoryConfigurationDelegate [restartedMain] Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2023-05-08 01:21:06,766 INFO org.springframework.data.repository.config.RepositoryConfigurationDelegate [restartedMain] Finished Spring Data repository scanning in 63 ms. Found 9 JPA repository interfaces.
+2023-05-08 01:21:07,389 INFO org.springframework.boot.web.embedded.tomcat.TomcatWebServer [restartedMain] Tomcat initialized with port(s): 9443 (https)
+2023-05-08 01:21:07,401 INFO org.apache.juli.logging.DirectJDKLog [restartedMain] Starting service [Tomcat]
+2023-05-08 01:21:07,402 INFO org.apache.juli.logging.DirectJDKLog [restartedMain] Starting Servlet engine: [Apache Tomcat/10.1.8]
+2023-05-08 01:21:07,443 INFO org.apache.juli.logging.DirectJDKLog [restartedMain] Initializing Spring embedded WebApplicationContext
+2023-05-08 01:21:07,443 INFO org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext [restartedMain] Root WebApplicationContext: initialization completed in 1355 ms
+2023-05-08 01:21:07,583 INFO com.zaxxer.hikari.HikariDataSource [restartedMain] HikariPool-1 - Starting...
+2023-05-08 01:21:07,725 INFO com.zaxxer.hikari.pool.HikariPool [restartedMain] HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@7b414cff
+2023-05-08 01:21:07,734 INFO com.zaxxer.hikari.HikariDataSource [restartedMain] HikariPool-1 - Start completed.
+2023-05-08 01:21:07,777 INFO org.hibernate.jpa.internal.util.LogHelper [restartedMain] HHH000204: Processing PersistenceUnitInfo [name: default]
+2023-05-08 01:21:07,818 INFO org.hibernate.Version [restartedMain] HHH000412: Hibernate ORM core version 6.1.7.Final
+2023-05-08 01:21:08,113 INFO org.hibernate.engine.jdbc.dialect.internal.DialectFactoryImpl [restartedMain] HHH000400: Using dialect: org.hibernate.dialect.MySQLDialect
+2023-05-08 01:21:08,906 INFO org.hibernate.engine.transaction.jta.platform.internal.JtaPlatformInitiator [restartedMain] HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform]
+2023-05-08 01:21:08,914 INFO org.springframework.orm.jpa.AbstractEntityManagerFactoryBean [restartedMain] Initialized JPA EntityManagerFactory for persistence unit 'default'
+2023-05-08 01:21:11,996 INFO org.springframework.security.provisioning.JdbcUserDetailsManager [restartedMain] No authentication manager set. Reauthentication of users when changing passwords will not be performed.
+2023-05-08 01:21:12,120 WARN org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration$JpaWebConfiguration [restartedMain] spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2023-05-08 01:21:12,493 INFO org.springframework.security.web.DefaultSecurityFilterChain [restartedMain] Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@20d45063, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@77099db1, org.springframework.security.web.context.SecurityContextHolderFilter@5c2d6bde, org.springframework.security.web.header.HeaderWriterFilter@5601b78a, org.springframework.security.web.authentication.logout.LogoutFilter@566c8ff3, org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter@5b7c8828, org.springframework.security.web.authentication.www.BasicAuthenticationFilter@5aa5efda, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@2d95785f, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@41aaf011, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@2a777b5, org.springframework.security.web.session.SessionManagementFilter@578ef054, org.springframework.security.web.access.ExceptionTranslationFilter@7469f3cd, org.springframework.security.web.access.intercept.AuthorizationFilter@10ee3fa]
+2023-05-08 01:21:12,756 INFO org.springframework.boot.devtools.autoconfigure.OptionalLiveReloadServer [restartedMain] LiveReload server is running on port 35729
+2023-05-08 01:21:12,893 INFO org.apache.juli.logging.DirectJDKLog [restartedMain] Connector [https-jsse-nio-9443], TLS virtual host [_default_], certificate type [UNDEFINED] configured from [file:/Users/nidhichowdhry/Documents/GMU/ISA%20681/scrabble_project.jks] using alias [scrabble] and with trust store [null]
+2023-05-08 01:21:12,907 INFO org.springframework.boot.web.embedded.tomcat.TomcatWebServer [restartedMain] Tomcat started on port(s): 9443 (https) with context path ''
+2023-05-08 01:21:12,916 INFO org.springframework.boot.StartupInfoLogger [restartedMain] Started Isa681Spring23ScrabbleApplication in 7.422 seconds (process running for 8.403)

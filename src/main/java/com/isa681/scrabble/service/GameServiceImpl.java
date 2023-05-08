@@ -9,23 +9,21 @@ import com.isa681.scrabble.exceptions.InvalidMoveException;
 import com.isa681.scrabble.exceptions.ResourceCannotBeCreatedException;
 import com.isa681.scrabble.exceptions.UnauthorizedAccessException;
 import jakarta.transaction.Transactional;
-import org.hibernate.sql.ast.tree.expression.Collation;
 import org.slf4j.Logger;
 import org.springframework.core.env.Environment;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.Method;
 import java.security.SecureRandom;
 import java.sql.*;
 import java.util.*;
 
 import org.slf4j.LoggerFactory;
-
-
-import static java.sql.DriverManager.getConnection;
 import com.isa681.scrabble.controller.ValidationController;
 
-import javax.xml.stream.events.Characters;
+import org.springframework.util.ReflectionUtils;
+
 
 @Service
 public class GameServiceImpl implements GameService {
@@ -375,9 +373,11 @@ public class GameServiceImpl implements GameService {
         }
     }
 
-    private void validateNewGameGrid(GameGrid dbGameGrid, GameGrid newGameGrid) {
+
+    private List<Integer> validateNewGameGrid(GameGrid dbGameGrid, GameGrid newGameGrid) {
 
         List<Integer> index = new ArrayList<Integer>();
+        List<Character> newPosChar = new ArrayList<Character>();
 
         //Check for overwrites on existing grid values
         if (dbGameGrid.getG1() != null && !dbGameGrid.getG1().equals(newGameGrid.getG1())) {
@@ -394,7 +394,6 @@ public class GameServiceImpl implements GameService {
         } else if (dbGameGrid.getG2() == null && newGameGrid.getG2()!=null) {
             index.add(2);
         }
-
 
         //Check for overwrites on existing grid values
         if (dbGameGrid.getG3() != null && !dbGameGrid.getG3().equals(newGameGrid.getG3())) {
@@ -665,32 +664,189 @@ public class GameServiceImpl implements GameService {
             index.add(36);
         }
 
-        if (index.size() > 1)
+        if (index.isEmpty())
         {
-            if(checkForVerticalList(index) || checkForHorizontalList(index))
+            throw new InvalidMoveException("Nothing played! Please add characters to grid.");
+        }
+        else {
+            if (index.size() > 1)
             {
-                myLogger.info("Players move was valid.");
+                if(checkForVerticalList(index) || checkForHorizontalList(index))
+                {
+                    myLogger.info("Vertical and Horizontal check passed.");
+                    if(checkForHorizontalList(index))
+                    {
+                        if(!checkContiguity(index, newGameGrid,true)){
+                            throw new InvalidMoveException("Non contiguous move detected.");
+                        }
+                    }
+                    else
+                    {
+                        if(!checkContiguity(index, newGameGrid,false)){
+                            throw new InvalidMoveException("Non contiguous move detected.");
+                        }
+                    }
+
+                    if(!checkForGridIndexNextToExistingMove(index,dbGameGrid)){
+                        throw new InvalidMoveException("You need to play next to an existing move on board.");
+                    }
+                }
+                else
+                {
+                    throw new InvalidMoveException("Some blocks are not together. You can either play vertically or horizontally!");
+                }
+            }
+            else if (index.size() == 1){
+                myLogger.info("1 character move by player");
+                if(!checkForGridIndexNextToExistingMove(index,dbGameGrid)){
+                    throw new InvalidMoveException("You need to make a play next to an existing move on board.");
+                }
+            }}
+
+        return index;
+    }
+
+    private Character invokeGridGetter(int charIndex, GameGrid newGameGrid)
+    {
+        try {
+            Method method = ReflectionUtils.findMethod(GameGrid.class, "getG" + charIndex);
+            if (method != null) {
+                ReflectionUtils.makeAccessible(method);
+                Object obj = method.invoke(newGameGrid);
+                if (obj == null)
+                {
+                    return null;
+                }
+                if (obj.getClass().equals(Character.class))
+                {
+                    return ((Character) obj).charValue();
+                }
+
+            }
+            else
+            {return null;}
+        }
+        catch(Exception e)
+        {
+            throw new InvalidMoveException("Some Error Occured. Please contact Game Admin.");
+        }
+
+        return null;
+    }
+
+    private Boolean checkContiguity(List<Integer> indexList, GameGrid newGameGrid, Boolean isHorizontal)
+    {
+        int firstIndex = indexList.get(0);
+        int lastIndex = indexList.get(indexList.size() - 1);
+
+        //Check horizontal contiguity
+        if(isHorizontal)
+        {
+            int closestmultiple = getclosestmultipleto6(firstIndex);
+            int i;
+            for(i=firstIndex;i<=closestmultiple;i++)
+            {
+                if(invokeGridGetter(i,newGameGrid) == null)
+                {
+                    if(i<lastIndex)
+                    {return false;}
+                }
+            }
+        }
+        //Check vertical contiguity
+        else
+        {
+            int i =firstIndex;
+            while(i<37)
+            {
+                if(invokeGridGetter(i,newGameGrid) == null)
+                {
+                    if(i<lastIndex)
+                    {return false;}
+                }
+                i+=6;
+            }
+        }
+
+        return true;
+    }
+
+
+    private Boolean checkForGridIndexNextToExistingMove(List<Integer> indexList, GameGrid dbGameGrid)
+    {
+        int i;
+        for(i=0;i<indexList.size();i++)
+        {
+            int playedIndex = indexList.get(i);
+            if(playedIndex%6 == 0)
+            {
+                if ((invokeGridGetter(playedIndex - 1, dbGameGrid) != null) ||
+                        (invokeGridGetter(playedIndex - 6, dbGameGrid) != null) ||
+                        (invokeGridGetter(playedIndex + 1, dbGameGrid) != null)) {
+                    return true;
+                }
+            }
+            else if(playedIndex%6 == 1){
+                if ((invokeGridGetter(playedIndex + 1, dbGameGrid) != null) ||
+                        (invokeGridGetter(playedIndex - 6, dbGameGrid) != null) ||
+                        (invokeGridGetter(playedIndex + 6, dbGameGrid) != null)) {
+                    return true;
+                }
             }
             else
             {
-                throw new InvalidMoveException("Some blocks are not together. You can either play vertically or horizontally!");
+                if ((invokeGridGetter(playedIndex - 1, dbGameGrid) != null) ||
+                        (invokeGridGetter(playedIndex + 1, dbGameGrid) != null) ||
+                        (invokeGridGetter(playedIndex - 6, dbGameGrid) != null) ||
+                        (invokeGridGetter(playedIndex + 6, dbGameGrid) != null)) {
+                    return true;
+                }
             }
         }
-        else {
-            myLogger.info("1 character added to grid");
-        }
-        myLogger.info("Index is ", index);
+        return false;
+    }
 
+
+
+
+    private int getclosestmultipleto6(int n){
+        int closestMultiple=0;
+
+        if(n < 6)
+        {
+            closestMultiple = 6;
+        }
+        else
+        {
+            closestMultiple =  n;
+            closestMultiple = closestMultiple + 6/2;
+            closestMultiple = closestMultiple - (closestMultiple%6);
+            if(closestMultiple < n)
+            {
+                closestMultiple +=6;
+            }
+        }
+        return closestMultiple;
     }
 
     private Boolean checkForHorizontalList(List<Integer> indexList){
         int i = 0;
-        for(i =1; i< indexList.size();i++ )
+        int charIndex = indexList.get(0);
+        List<Integer> validIndexes =  new ArrayList<>();
+        int closestMultiple;
+
+
+        closestMultiple = getclosestmultipleto6(charIndex);
+
+        while(charIndex<=closestMultiple)
         {
-            if (indexList.get(i) == (indexList.get(i-1)+ 1))
-            {continue;}
-            else
-            {
+            validIndexes.add(charIndex);
+            charIndex = charIndex+1;
+        }
+
+        for(i=0;i<indexList.size();i++)
+        {
+            if(!validIndexes.contains(indexList.get(i))){
                 return false;
             }
         }
@@ -699,17 +855,188 @@ public class GameServiceImpl implements GameService {
 
     private Boolean checkForVerticalList(List<Integer> indexList){
         int i = 0;
-        for(i =1; i< indexList.size();i++ )
+        int charIndex = indexList.get(0);
+        List<Integer> validIndexes =  new ArrayList<>();
+
+
+        while(charIndex<37)
         {
-            if (indexList.get(i) == (indexList.get(i-1)+ 6))
-            {continue;}
-            else
-            {
+            validIndexes.add(charIndex);
+            charIndex =  charIndex+6;
+        }
+
+        for(i=0;i<indexList.size();i++)
+        {
+            if(!validIndexes.contains(indexList.get(i))){
                 return false;
             }
         }
         return true;
+
     }
+
+    private void validateCharactersInPlayerLetter(List<Character> newChars, GamePlayer myGamePlayer)
+    {
+        List<PlayerLetter> playerLetters;
+        List<Character> playerChars =  new ArrayList<>();
+        playerLetters = playerLettersRepository.findPlayerLettersByPlGamePlayerAndUsedIsFalse(myGamePlayer);
+
+        int i;
+        if(playerLetters==null)
+        {
+            throw new InvalidMoveException("Player does not have any letters left to play.");
+        }
+        else
+        {
+            playerLetters.forEach(x -> playerChars.add(x.getPlLetter().getAlphabet()));
+        }
+
+        newChars.forEach(y -> {
+            if (playerChars.contains(y)) {
+                playerChars.remove(y);
+            }
+            else {
+                throw new InvalidMoveException("You do not have the letters you're trying to play.");
+            }
+        });
+
+    }
+
+    private List<String> getWordsPlayed(List<Integer> indexList, GameGrid myGamegrid){
+
+        int firstIndex = indexList.get(0);
+        int lastIndex = indexList.get(indexList.size() - 1);
+        List<String> myWords  = new ArrayList<>();
+
+        //Move was played horizontally. Get 1 horizontal word and any possible vertical words
+        if(checkForHorizontalList(indexList))
+        {
+            //Get Horizontal Word
+            int closestmultiple = getclosestmultipleto6(firstIndex);
+            int firstGridIndexInRow = closestmultiple - 5;
+            int i;
+            List<Character> word = new ArrayList<>();
+            for(i=firstGridIndexInRow;i<=closestmultiple;i++)
+            {
+                if(invokeGridGetter(i,myGamegrid) == null)
+                {
+                    if(i>lastIndex)
+                    {break;}
+                    else if(i < firstIndex)
+                    {
+                        word.clear();
+                    }
+                    else
+                    {throw new InvalidMoveException("Something went wrong. Please contact the game admin.");}
+                }
+                else
+                {
+                    word.add(invokeGridGetter(i,myGamegrid));
+                }
+            }
+
+            if(word.size()>1) {
+                myWords.add(word.toString());
+            }
+
+            //Get Vertical Words created with a horizontal play
+            int j;
+            for(j=0;j<indexList.size();j++)
+            {
+                int k = indexList.get(j)%6;
+                List<Character> word1 = new ArrayList<>();
+
+                while(k<37)
+                {
+                    if(invokeGridGetter(k,myGamegrid) == null)
+                    {
+                        if(k>indexList.get(j))
+                        {break;}
+                        else if(k < indexList.get(j))
+                        {
+                            word1.clear();
+                        }
+                        else
+                        {throw new InvalidMoveException("Something went wrong. Please contact the game admin.");}
+                    }
+                    else
+                    {
+                        word1.add(invokeGridGetter(k,myGamegrid));
+                    }
+                    k+=6;
+                }
+
+                if(word1.size()>1) {
+                    myWords.add(word1.toString());
+                }
+            }
+        }
+        //Move was played vertically. Get 1 vertical word and any possible horizontal words
+        else
+        {
+            int i =firstIndex%6;
+            List<Character> word = new ArrayList<>();
+            while(i<37)
+            {
+                if(invokeGridGetter(i,myGamegrid) == null)
+                {
+                    if(i>lastIndex)
+                    {break;}
+                    else if(i < firstIndex)
+                    {
+                        word.clear();
+                    }
+                    else
+                    {throw new InvalidMoveException("Something went wrong. Please contact the game admin.");}
+                }
+                else
+                {
+                    word.add(invokeGridGetter(i,myGamegrid));
+                }
+
+                i+=6;
+            }
+
+            if(word.size()>1) {
+                myWords.add(word.toString());
+            }
+
+            //Get Horizontal words created with vertical play
+
+            int j;
+            for(j=0;j<indexList.size();j++) {
+                int closestmultiple = getclosestmultipleto6(indexList.get(j));
+                int firstGridIndexInRow = closestmultiple - 5;
+                int k;
+                List<Character> word1 = new ArrayList<>();
+                for (k = firstGridIndexInRow; k <= closestmultiple; k++) {
+                    if (invokeGridGetter(k, myGamegrid) == null) {
+                        if (k > indexList.get(j)) {
+                            break;
+                        } else if (k < indexList.get(j)) {
+                            word1.clear();
+                        } else {
+                            throw new InvalidMoveException("Something went wrong. Please contact the game admin.");
+                        }
+                    } else {
+                        word1.add(invokeGridGetter(k, myGamegrid));
+                    }
+                }
+
+                if (word1.size() > 1) {
+                    myWords.add(word1.toString());
+                }
+            }
+        }
+
+        return myWords;
+    }
+
+    private boolean checkWordsInDictionary(List<String> myWords)
+    {
+        return true;
+    }
+
 
     @Override
     public void submitMove(GameGrid myGamegrid, Long gameId, String username){
@@ -719,25 +1046,35 @@ public class GameServiceImpl implements GameService {
 
         myGamePlayer = getGamePlayerFromUsername(username,gameId);
 
+        List<Character> newPosChars = new ArrayList<>();
+        List<Integer> newPosIndex;
+
+
         if(Objects.isNull(myGamePlayer))
         {throw new UnauthorizedAccessException("User not a player in this game");}
         else
         {
             if (!myGamePlayer.getIsTurn()){
-            throw new UnauthorizedAccessException("It's not your turn!");}
+                throw new UnauthorizedAccessException("It's not your turn!");}
         }
         dbGameGrid = getGameGridFromGameId(gameId);
 
-        validateNewGameGrid(dbGameGrid,myGamegrid);
+        newPosIndex = validateNewGameGrid(dbGameGrid,myGamegrid);
+        newPosChars.forEach(x -> newPosChars.add(invokeGridGetter(x,myGamegrid)));
+
+        validateCharactersInPlayerLetter(newPosChars,myGamePlayer);
+
+        List<String> moveWordsList = getWordsPlayed(newPosIndex,myGamegrid);
+
 
         //TODO: //DONE get gameplayer from user, gameid - throw exception is user not in game
         //TODO: //DONE check if it is game player's turn
         //TODO: //DONE get game state - grid from DB
-        //TODO: find what letters are new
-        //TODO: validate no grid index is overwritten
-        //TODO: get gameplayer letters. validate if letters played are with player
-        //TODO: check if atleast one letter is next to an already placed letter
-        //TODO: get word(s) played
+        //TODO: //Done find what letters are new
+        //TODO: //Done validate no grid index is overwritten
+        //TODO: //Done get gameplayer letters. validate if letters played are with player
+        //TODO: //Done check if atleast one letter is next to an already placed letter
+        //TODO: //Done get word(s) played
         //TODO: check if words in dictionary https://api.dictionaryapi.dev/api/v2/entries/en/<word>
         //TODO: add new move entry
         //TODO: add new move location
