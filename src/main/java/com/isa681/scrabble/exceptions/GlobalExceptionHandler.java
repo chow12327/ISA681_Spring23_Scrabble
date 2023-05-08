@@ -1,6 +1,9 @@
 package com.isa681.scrabble.exceptions;
 
 import com.isa681.scrabble.entity.ErrorDetail;
+import com.isa681.scrabble.service.GameServiceImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -13,6 +16,9 @@ import java.util.Date;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
+
+    Logger myLogger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
     @ExceptionHandler(InvalidMoveException.class)
     @ResponseBody
     public ResponseEntity<ErrorDetail> handleInvalidMoveException(InvalidMoveException exception,
@@ -76,8 +82,10 @@ public class GlobalExceptionHandler {
     @ResponseBody
     public ResponseEntity<ErrorDetail> handleGlobalException(Exception exception,
                                                               WebRequest webRequest){
-        ErrorDetail errorDetails = new ErrorDetail(new Date(), exception.getMessage(),
+        myLogger.error(exception.getMessage());
+        ErrorDetail errorDetails = new ErrorDetail(new Date(), "An unknown error occurred. Please contact the game admin.",
                 webRequest.getDescription(false));
+
         return new ResponseEntity<>(errorDetails, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 

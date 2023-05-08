@@ -20,6 +20,6 @@ public interface GameService {
 
     void submitMove(GameGrid myGamegrid, Long gameId, String username);
 
-    GameBoardResponse getGameBoard(Long gameId) throws SQLException;
+    GameBoardResponse getGameBoard(Long gameId, String username);
 
 }

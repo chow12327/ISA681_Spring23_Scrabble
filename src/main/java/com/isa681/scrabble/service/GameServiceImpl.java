@@ -4,13 +4,14 @@ package com.isa681.scrabble.service;
 import com.isa681.scrabble.controller.GameController;
 import com.isa681.scrabble.dao.*;
 import com.isa681.scrabble.entity.*;
-import com.isa681.scrabble.exceptions.GameNotFoundException;
-import com.isa681.scrabble.exceptions.InvalidMoveException;
-import com.isa681.scrabble.exceptions.ResourceCannotBeCreatedException;
-import com.isa681.scrabble.exceptions.UnauthorizedAccessException;
+import com.isa681.scrabble.exceptions.*;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
+import org.springframework.beans.PropertyAccessor;
+import org.springframework.beans.PropertyAccessorFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -18,11 +19,13 @@ import java.lang.reflect.Method;
 import java.security.SecureRandom;
 import java.sql.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import org.slf4j.LoggerFactory;
 import com.isa681.scrabble.controller.ValidationController;
 
 import org.springframework.util.ReflectionUtils;
+import org.springframework.web.client.RestTemplate;
 
 
 @Service
@@ -36,13 +39,20 @@ public class GameServiceImpl implements GameService {
     private PlayerLettersRepository playerLettersRepository;
     private PlayerRepository playerRepository;
     private LetterRepository letterRepository;
+
+    private PlayGridRepository gridRepository;
     private SecureRandom rand;
     private Connection connection;
+
+    @Value("${dictionary.api}")
+    String DictionaryUri;
+
+
 
     public GameServiceImpl(Environment environment, GameRepository gameRepository, GamePlayerRepository gamePlayerRepository,
                            GameMovesRepository gameMovesRepository, MoveLocationRepository moveLocationRepository,
                            MoveWordsRepository moveWordsRepository, PlayerLettersRepository playerLettersRepository,
-                           PlayerRepository playerRepository, LetterRepository letterRepository) throws SQLException {
+                           PlayerRepository playerRepository, LetterRepository letterRepository, PlayGridRepository gridRepository) throws SQLException {
         this.gameRepository = gameRepository;
         this.gamePlayerRepository = gamePlayerRepository;
         this.gameMovesRepository = gameMovesRepository;
@@ -51,6 +61,7 @@ public class GameServiceImpl implements GameService {
         this.playerLettersRepository = playerLettersRepository;
         this.playerRepository = playerRepository;
         this.letterRepository = letterRepository;
+        this.gridRepository = gridRepository;
         this.rand =  new SecureRandom();
         String url = environment.getProperty("spring.datasource.url");
         String username = environment.getProperty("spring.datasource.username");
@@ -734,6 +745,7 @@ public class GameServiceImpl implements GameService {
         return null;
     }
 
+
     private Boolean checkContiguity(List<Integer> indexList, GameGrid newGameGrid, Boolean isHorizontal)
     {
         int firstIndex = indexList.get(0);
@@ -936,7 +948,9 @@ public class GameServiceImpl implements GameService {
             }
 
             if(word.size()>1) {
-                myWords.add(word.toString());
+                myWords.add(word.stream()
+                        .map(String::valueOf)
+                        .collect(Collectors.joining()));
             }
 
             //Get Vertical Words created with a horizontal play
@@ -967,7 +981,9 @@ public class GameServiceImpl implements GameService {
                 }
 
                 if(word1.size()>1) {
-                    myWords.add(word1.toString());
+                    myWords.add(word1.stream()
+                            .map(String::valueOf)
+                            .collect(Collectors.joining()));
                 }
             }
         }
@@ -998,7 +1014,9 @@ public class GameServiceImpl implements GameService {
             }
 
             if(word.size()>1) {
-                myWords.add(word.toString());
+                myWords.add(word.stream()
+                        .map(String::valueOf)
+                        .collect(Collectors.joining()));
             }
 
             //Get Horizontal words created with vertical play
@@ -1024,7 +1042,10 @@ public class GameServiceImpl implements GameService {
                 }
 
                 if (word1.size() > 1) {
-                    myWords.add(word1.toString());
+                    //myWords.add(word1.toString());
+                    myWords.add(word1.stream()
+                            .map(String::valueOf)
+                            .collect(Collectors.joining()));
                 }
             }
         }
@@ -1034,15 +1055,41 @@ public class GameServiceImpl implements GameService {
 
     private boolean checkWordsInDictionary(List<String> myWords)
     {
+        int i;
+        boolean match = true;
+        StringJoiner invalidWords = new StringJoiner(", ");   //StringeJoiner object
+
+
+        for(i=0; i< myWords.size();i++)
+        {
+            String wordUri = this.DictionaryUri + myWords.get(i);
+            RestTemplate dictionaryAPI = new RestTemplate();
+            try {
+                String result = dictionaryAPI.execute(wordUri, HttpMethod.GET, null, null);
+            }
+            catch(Exception e)
+            {     invalidWords.add(myWords.get(i).toString());
+                match=false;}
+        }
+
+        if(!match)
+        {
+            throw new InvalidMoveException("Invalid word(s) - " + invalidWords.toString());
+        }
+
         return true;
     }
 
 
     @Override
+    @Transactional
     public void submitMove(GameGrid myGamegrid, Long gameId, String username){
 
         GamePlayer myGamePlayer;
         GameGrid dbGameGrid;
+
+        List<MoveLocation> moveLocations = new ArrayList<>();
+        List<MoveWord> moveWords = new ArrayList<>();
 
         myGamePlayer = getGamePlayerFromUsername(username,gameId);
 
@@ -1060,11 +1107,48 @@ public class GameServiceImpl implements GameService {
         dbGameGrid = getGameGridFromGameId(gameId);
 
         newPosIndex = validateNewGameGrid(dbGameGrid,myGamegrid);
-        newPosChars.forEach(x -> newPosChars.add(invokeGridGetter(x,myGamegrid)));
+        newPosIndex.forEach(x -> newPosChars.add(invokeGridGetter(x,myGamegrid)));
 
         validateCharactersInPlayerLetter(newPosChars,myGamePlayer);
 
         List<String> moveWordsList = getWordsPlayed(newPosIndex,myGamegrid);
+
+        checkWordsInDictionary(moveWordsList);
+
+        GameMove gameMove = new GameMove();
+        gameMove.setMovePlayer(myGamePlayer);
+        gameMove.setTotalScore(0);
+
+        gameMovesRepository.save(gameMove);
+
+        int i;
+        for(i=0;i<newPosIndex.size();i++)
+        {
+            Letter letter = letterRepository.findByAlphabet(Character.toUpperCase(newPosChars.get(i)));
+            Grid grid = gridRepository.findById(newPosIndex.get(i).longValue()).get();
+            MoveLocation moveLocation = new MoveLocation();
+            moveLocation.setMlLetter(letter);
+            moveLocation.setMlGridIndex(grid);
+            moveLocation.setMlMove(gameMove);
+            moveLocations.add(moveLocation);
+        }
+
+        int j=0;
+        int totalScore = 0;
+        for(j=0;j<moveWordsList.size();j++)
+        {
+            MoveWord moveWord =  new MoveWord();
+            moveWord.setWord(moveWordsList.get(j));
+            moveWord.setMwMove(gameMove);
+            moveWords.add(moveWord);
+            totalScore = totalScore+ (moveWordsList.get(j)).length();
+        }
+
+        moveLocationRepository.saveAll(moveLocations);
+        moveWordsRepository.saveAll(moveWords);
+
+        gameMove.setTotalScore(totalScore);
+        gameMovesRepository.save(gameMove);
 
 
         //TODO: //DONE get gameplayer from user, gameid - throw exception is user not in game
@@ -1075,11 +1159,12 @@ public class GameServiceImpl implements GameService {
         //TODO: //Done get gameplayer letters. validate if letters played are with player
         //TODO: //Done check if atleast one letter is next to an already placed letter
         //TODO: //Done get word(s) played
-        //TODO: check if words in dictionary https://api.dictionaryapi.dev/api/v2/entries/en/<word>
-        //TODO: add new move entry
-        //TODO: add new move location
-        //TODO: add new move words
-        //TODO: Update score
+        //TODO: //Done check if words in dictionary https://api.dictionaryapi.dev/api/v2/entries/en/<word>
+        //TODO: //Done add new move entry
+        //TODO: //Done add new move location
+        //TODO: //Done add new move words
+        //TODO: //Done Update score
+        //TODO: Update turn
         //TODO: validate if game is over
         //TODO: update win/loss/draw is game is over
 
@@ -1108,22 +1193,147 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
-    public GameBoardResponse getGameBoard(Long gameId) throws SQLException {
-        GameBoardResponse game = new GameBoardResponse();
+    public GameBoardResponse getGameBoard(Long gameId, String username) {
+        GameBoardResponse gameBoardResponse = new GameBoardResponse();
         ValidationController.validateGameId(gameId);
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        List<PlayerLetter> playerLetters = getLettersforPlayer(gameId,username);
-        game.setL1(playerLetters.get(0).getPlLetter().getAlphabet());
-//        String sql = "SELECT * FROM game where is_finished = true";
-//        PreparedStatement statement = connection.prepareStatement(sql);
-//        ResultSet resultSet = statement.executeQuery();
-//        while (resultSet.next()) {
-//
-//        }
-        //Test
-        myLogger.info("Info Hit gameboard");
 
-        return game;
+        Player myPlayer;
+        Game myGame;
+        List<GamePlayer> myGamePlayers;
+        List<Player> players = new ArrayList<>();
+
+        Integer player1Score = 0;
+        Integer player2Score = 0;
+        boolean gameStatus;
+
+        myPlayer = playerRepository.findByUserName(username);
+        myGame = getGameFromGameId(gameId);
+        myGamePlayers = gamePlayerRepository.findGamePlayersByGame(myGame);
+        List<GameMove> player1moves;
+        List<GameMove> player2moves;
+        List<MoveResponse> gameMovesResponse =  new ArrayList<>();
+        GameGrid gameGrid =  new GameGrid();
+
+        GamePlayer myGamePlayer;
+
+        if(myGamePlayers.isEmpty())
+        {
+            throw new InvalidUserDetailsException("No users in the game");
+        }
+
+        myGamePlayers.forEach((x) -> players.add(x.getPlayer()));
+
+        if (myGame.getIsFinished() == false && !players.contains(myPlayer))
+        {
+            throw new UnauthorizedAccessException("This game has not finished. You cannot view it.");
+        }
+        else
+        {
+            //Get player scores
+            player1moves= myGamePlayers.get(0).getGameMoves();
+            player2moves= myGamePlayers.get(1).getGameMoves();
+
+            int i;
+            if (player1moves!=null && player1moves.size()>0)
+            {
+                for(GameMove move : player1moves)
+                {
+                    MoveResponse moveResponse = new MoveResponse();
+                    List<String> words = new ArrayList<>();
+
+                    player1Score += move.getTotalScore();
+
+                    //get Move Words
+                    moveResponse.setId(move.getId());
+                    moveResponse.setUsername(players.get(0).getUserName());
+                    move.getMoveWords().forEach(moveword -> words.add(moveword.getWord()));
+                    moveResponse.setWords(words);
+                    gameMovesResponse.add(moveResponse);
+
+                    //Get Move Location and set in Game Grid
+                    move.getMoveLocations().forEach(loc ->
+                    {
+                        PropertyAccessor myAccessor = PropertyAccessorFactory.forBeanPropertyAccess(gameGrid);
+                        myAccessor.setPropertyValue("g"+loc.getMlGridIndex().getId(), loc.getMlLetter().getAlphabet());
+                    });
+                }
+            }
+
+            if (player2moves!=null && player2moves.size()>0)
+            {
+                for(GameMove move : player2moves)
+                {
+                    MoveResponse moveResponse = new MoveResponse();
+                    List<String> words = new ArrayList<>();
+
+                    player2Score += move.getTotalScore();
+
+                    //get Move Words
+                    moveResponse.setId(move.getId());
+                    moveResponse.setUsername(players.get(1).getUserName());
+                    move.getMoveWords().forEach(moveword -> words.add(moveword.getWord()));
+                    moveResponse.setWords(words);
+                    gameMovesResponse.add(moveResponse);
+
+                    //Get Move Location and set in Game Grid
+                    move.getMoveLocations().forEach(loc ->
+                    {
+                        PropertyAccessor myAccessor = PropertyAccessorFactory.forBeanPropertyAccess(gameGrid);
+                        myAccessor.setPropertyValue("g"+loc.getMlGridIndex().getId(), loc.getMlLetter().getAlphabet());
+                    });
+                }
+            }
+
+            //Sort moves in reverse order of move id
+            if (gameMovesResponse!=null && gameMovesResponse.size()>0)
+            {
+                Collections.sort(gameMovesResponse,(x,y) -> {return x.getId().intValue() - y.getId().intValue();});
+            }
+
+            //SetGameBoard
+            gameBoardResponse.setId(gameId);
+            gameBoardResponse.setPlayer1Username(players.get(0).getUserName());
+            gameBoardResponse.setPlayer2Username(players.get(1).getUserName());
+
+            gameBoardResponse.setPlayer1Score(player1Score);
+            gameBoardResponse.setPlayer2Score(player2Score);
+
+            gameBoardResponse.setMoves(gameMovesResponse);
+
+            gameBoardResponse.setGameGrid(gameGrid);
+
+            if (myGame.getIsFinished() == false && players.contains(myPlayer))
+            {
+                myGamePlayer = getGamePlayerFromUsername(username,gameId);
+
+                gameBoardResponse.setTurn(myGamePlayer.getIsTurn());
+
+                //Game not finished
+                List<PlayerLetter> playerLetters = getLettersforPlayer(gameId,username);
+
+                if(playerLetters.size() == 5) {
+                    gameBoardResponse.setL1(playerLetters.get(0).getPlLetter().getAlphabet());
+                    gameBoardResponse.setL2(playerLetters.get(1).getPlLetter().getAlphabet());
+                    gameBoardResponse.setL3(playerLetters.get(2).getPlLetter().getAlphabet());
+                    gameBoardResponse.setL4(playerLetters.get(3).getPlLetter().getAlphabet());
+                    gameBoardResponse.setL5(playerLetters.get(4).getPlLetter().getAlphabet());
+                }
+                else {
+                    throw new ResourceCannotBeCreatedException("There was a problem with getting more letters.");
+                }
+
+            }
+            else
+            {
+                gameBoardResponse.setTurn(false);
+            }
+        }
+
+        return gameBoardResponse;
+
+        //TODO: Add exception for non-existent game everywhere
+
+
     }
 
 }

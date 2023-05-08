@@ -43,27 +43,6 @@ public class GameController {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         gameService.joinGame(gameId,username);
     }
-    
-
-    @GetMapping("/api/gamedetails")
-    public ResponseEntity<GameBoardResponse> getGameDetails(@RequestParam Long gameId){
-        GameBoardResponse myGameBoard = new GameBoardResponse();
-
-        ValidationController.validateGameId(gameId);
-
-        //Game myGame;
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-
-        //myGame = gameService.getGameDetails(gameId,username);
-
-        myGameBoard.setId(gameId);
-        myGameBoard.setPlayer1Username(username);
-        myGameBoard.setPlayer1Score(0);
-
-        return ResponseEntity.ok(myGameBoard);
-
-       // return ResponseEntity.ok(myGame);
-    }
 
     @PostMapping("/api/submitMove")
     public void submitMove(@RequestBody MoveRequest myMove){
@@ -73,24 +52,24 @@ public class GameController {
     }
 
 
-    @GetMapping("/api/playerLetters")
-    public ResponseEntity<List<PlayerLetter>> getPlayerLetters(@RequestParam Long gameId){
+//    @GetMapping("/api/playerLetters")
+//    public ResponseEntity<List<PlayerLetter>> getPlayerLetters(@RequestParam Long gameId){
+//
+//        ValidationController.validateGameId(gameId);
+//        List<PlayerLetter> playerLetters;
+//        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+//        playerLetters = gameService.getLettersforPlayer(gameId,username);
+//        return ResponseEntity.ok(playerLetters);
+//    }
 
-        ValidationController.validateGameId(gameId);
-
-        List<PlayerLetter> playerLetters;
-
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-
-        playerLetters = gameService.getLettersforPlayer(gameId,username);
-        return ResponseEntity.ok(playerLetters);
-    }
-
-    @GetMapping("/api/gameBoardResponse")
+    @GetMapping("/api/gameDetails")
     public ResponseEntity<GameBoardResponse> getGameBoardResponse(@RequestParam Long gameId){
-        GameBoardResponse game = new GameBoardResponse();
+        GameBoardResponse myBoard = new GameBoardResponse();
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
         myLogger.info("Info Hit gameboard");
-        return ResponseEntity.ok(game);
+
+        myBoard = gameService.getGameBoard(gameId,username);
+        return ResponseEntity.ok(myBoard);
     }
 
 }
