@@ -1,9 +1,29 @@
 <div class="container">
-    <div class="form-inline">
+    <!--<div class="form-inline">
         <a href="../dashboard" style="text-decoration:none"><h1 class="mt-3 mb-3">Welcome to Scrabble</h1></a>
         <button (click)=lgout() class="btn btn-success" style="position:relative; left:55%">Logout</button>
     </div>
-    
+<button  (click)=lgout() class="btn btn-primary mr-4 mt-5 mb-1 ml-1 float-right" >Join Game</button>
+-->
+
+    <div class="row bg-light">
+        <div class="col-6 " >
+            <a href="../dashboard" style="text-decoration:none"><h1 class="mt-3 mb-3">Welcome to Scrabble</h1></a>
+        </div>
+        <div class="col" >
+            <button  (click)=lgout() class="btn btn-primary float-right mt-5 mb-1" >Logout</button>
+            <button  (click)="EnterGame()" class="btn btn-primary mr-4 mt-5 mb-1 ml-1 float-right" >Join Game</button>
+            
+            <input type="number"  class="form-control float-right w-25 mt-5 mb-1 mr-1" id="gmid" name="gmid" min="0" [(ngModel)]="game.gmid" #gmid="ngModel">
+            <div *ngIf="gmid.invalid && (gmid.dirty || gmid.touched)" class="alert alert-danger">
+                <div *ngIf="gmid.errors?.['min']">
+                    Enter valid game id
+                </div>
+            </div>
+
+        </div>
+    </div>
+
     <div class="container">
         <div class="row">
             <div class="col">

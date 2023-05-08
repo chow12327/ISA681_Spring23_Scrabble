@@ -16,6 +16,10 @@ import { GameService } from 'src/app/services/game.service';
 
 export class DashboardComponent implements OnInit {
 
+  game = { 
+    gmid: ''
+  };
+
   players: Player[] = [];
   histgames: Histgame[] = [];
   activegames: Histgame[] = [];
@@ -112,6 +116,14 @@ export class DashboardComponent implements OnInit {
 
   ViewGame(gmid: number) {
     this.router.navigate(['game',gmid])
+  }
+
+  EnterGame(){
+    let gmidstr: any;
+    if(this.game.gmid!=null){
+      gmidstr = this.game.gmid+"";
+    }
+    this.ViewGame(gmidstr);
   }
 
   lgout(){
