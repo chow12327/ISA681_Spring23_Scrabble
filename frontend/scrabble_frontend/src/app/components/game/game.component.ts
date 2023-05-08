@@ -15,6 +15,9 @@ export class GameComponent implements OnInit{
   gameGrid: Grid;
   tagme: boolean = true
 
+  moveError: boolean = false
+  moveErrorMessage: string = "hello. There is an error on this page at this screen at this move blah blah blah"
+
   player1: string = "user1"
   player2: string = "user2"
   score1: number = 10
@@ -84,6 +87,9 @@ export class GameComponent implements OnInit{
 
   submitMove(){
 
+  this.moveError = false
+  this.moveErrorMessage = ""
+
     var newMove = 
     {
         "gameId": this.gameid,
@@ -98,12 +104,19 @@ export class GameComponent implements OnInit{
         // }
       },
       error => {
+        this.moveError = true
+        
         if (error.status == 401) {
           this.basicAuthenticationService.logout();
           this.router.navigate(['login']);
         }
         if (error.status == 400 ){
-          console.log("Invalid Move");
+          //console.log("Invalid Move");
+          this.moveErrorMessage = error.error.message;
+        }
+        if (error.status == 500 ){
+          //console.log("Invalid Move");
+          this.moveErrorMessage = error.error.message;
         }
       }
     )

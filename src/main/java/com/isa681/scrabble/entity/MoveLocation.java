@@ -34,7 +34,7 @@ public class MoveLocation {
     @Getter @Setter
     private Grid mlGridIndex;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "letterID")
     @Getter @Setter
     private Letter mlLetter;

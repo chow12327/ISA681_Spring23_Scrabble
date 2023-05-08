@@ -3,6 +3,7 @@ package com.isa681.scrabble.controller;
 import com.isa681.scrabble.entity.GameGrid;
 import com.isa681.scrabble.entity.JwtTokenRequest;
 import com.isa681.scrabble.entity.SignUpRequest;
+import com.isa681.scrabble.exceptions.InvalidMoveException;
 import com.isa681.scrabble.exceptions.InvalidUserDetailsException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -74,7 +75,7 @@ public class ValidationController {
 
         if (alphabet!=null && !Character.isLetter(alphabet))
         {
-            throw new IllegalArgumentException("Invalid value entered in grid!");
+            throw new InvalidMoveException("Invalid value entered in grid!");
         }
     }
 

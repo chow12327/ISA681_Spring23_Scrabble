@@ -42,8 +42,9 @@ public class Letter {
     @UpdateTimestamp
     private Date updateDate;
 
-    @OneToOne(mappedBy = "mlLetter")
-    private MoveLocation moveLocation;
+    @JsonIgnore
+    @OneToMany(mappedBy = "mlLetter")
+    private List<MoveLocation> moveLocation;
 
     @OneToMany(mappedBy = "plLetter")
     private List<PlayerLetter> playerLetter;
