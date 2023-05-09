@@ -1,7 +1,7 @@
 package com.isa681.scrabble.service;
 
 
-import com.isa681.scrabble.controller.GameController;
+
 import com.isa681.scrabble.dao.*;
 import com.isa681.scrabble.entity.*;
 import com.isa681.scrabble.exceptions.*;
@@ -10,14 +10,11 @@ import org.slf4j.Logger;
 import org.springframework.beans.PropertyAccessor;
 import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.env.Environment;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Method;
 import java.security.SecureRandom;
-import java.sql.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -31,28 +28,27 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class GameServiceImpl implements GameService {
     Logger myLogger = LoggerFactory.getLogger(GameServiceImpl.class);
-    private GameRepository gameRepository;
-    private GamePlayerRepository gamePlayerRepository;
-    private GameMovesRepository gameMovesRepository;
-    private MoveLocationRepository moveLocationRepository;
-    private MoveWordsRepository moveWordsRepository;
-    private PlayerLettersRepository playerLettersRepository;
-    private PlayerRepository playerRepository;
-    private LetterRepository letterRepository;
+    private final GameRepository gameRepository;
+    private final GamePlayerRepository gamePlayerRepository;
+    private final GameMovesRepository gameMovesRepository;
+    private final MoveLocationRepository moveLocationRepository;
+    private final MoveWordsRepository moveWordsRepository;
+    private final PlayerLettersRepository playerLettersRepository;
+    private final PlayerRepository playerRepository;
+    private final LetterRepository letterRepository;
 
-    private PlayGridRepository gridRepository;
-    private SecureRandom rand;
-    private Connection connection;
+    private final PlayGridRepository gridRepository;
+    private final SecureRandom rand;
 
     @Value("${dictionary.api}")
-    String DictionaryUri;
+    private String dictionaryUri;
 
 
 
-    public GameServiceImpl(Environment environment, GameRepository gameRepository, GamePlayerRepository gamePlayerRepository,
+    public GameServiceImpl(GameRepository gameRepository, GamePlayerRepository gamePlayerRepository,
                            GameMovesRepository gameMovesRepository, MoveLocationRepository moveLocationRepository,
                            MoveWordsRepository moveWordsRepository, PlayerLettersRepository playerLettersRepository,
-                           PlayerRepository playerRepository, LetterRepository letterRepository, PlayGridRepository gridRepository) throws SQLException {
+                           PlayerRepository playerRepository, LetterRepository letterRepository, PlayGridRepository gridRepository) {
         this.gameRepository = gameRepository;
         this.gamePlayerRepository = gamePlayerRepository;
         this.gameMovesRepository = gameMovesRepository;
@@ -63,10 +59,6 @@ public class GameServiceImpl implements GameService {
         this.letterRepository = letterRepository;
         this.gridRepository = gridRepository;
         this.rand =  new SecureRandom();
-        String url = environment.getProperty("spring.datasource.url");
-        String username = environment.getProperty("spring.datasource.username");
-        String password = environment.getProperty("spring.datasource.password");
-        connection = DriverManager.getConnection(url, username, password);
     }
 
 
@@ -113,6 +105,11 @@ public class GameServiceImpl implements GameService {
         GamePlayer newGamePlayer = new GamePlayer();
 
         myGame = getGameFromGameId(gameId);
+
+        if (myGame == null){
+            throw  new GameNotFoundException(""+gameId);
+        }
+
         boolean playerInGame = false;
 
         myGamePlayers = gamePlayerRepository.findGamePlayersByGame(myGame);
@@ -129,7 +126,10 @@ public class GameServiceImpl implements GameService {
                 if (myGamePlayers != null && myGamePlayers.size() <= 1) {
                     myPlayer = playerRepository.findByUserName(username);
                     newGamePlayer.setPlayer(myPlayer);
-                    newGamePlayer.setIsTurn(false);
+                    newGamePlayer.setIsTurn(true);
+                    if(myGamePlayers.get(0).getIsTurn()) {
+                        newGamePlayer.setIsTurn(false);
+                    }
                     newGamePlayer.setIsWinner(false);
                     newGamePlayer.setGame(myGame);
                     try {
@@ -153,11 +153,14 @@ public class GameServiceImpl implements GameService {
         Player myPlayer;
         Game myGame;
         List<GamePlayer> myGamePlayers;
-        //GamePlayer newGamePlayer = new GamePlayer();
 
         myPlayer = playerRepository.findByUserName(username);
 
         myGame = getGameFromGameId(gameId);
+
+        if (myGame == null){
+            throw  new GameNotFoundException(""+gameId);
+        }
 
         myGamePlayers = gamePlayerRepository.findGamePlayersByGame(myGame);
 
@@ -167,10 +170,10 @@ public class GameServiceImpl implements GameService {
         }
 
         List<Player> players = new ArrayList<>();
-        myGamePlayers.forEach((x) -> players.add(x.getPlayer()));
+        myGamePlayers.forEach(x -> players.add(x.getPlayer()));
 
 
-        if (myGame.getIsFinished() == false && !players.contains(myPlayer))
+        if (!myGame.getIsFinished() && !players.contains(myPlayer))
         {
             throw new UnauthorizedAccessException("game");
         }
@@ -221,19 +224,43 @@ public class GameServiceImpl implements GameService {
 
     }
 
+    private GamePlayer getOpponentPlayerFromUsername(String username, Long gameId){
+        Game myGame;
+        List<GamePlayer> gamePlayers;
+        GamePlayer opponent = null;
+
+        myGame = getGameFromGameId(gameId);
+
+        gamePlayers = gamePlayerRepository.findGamePlayersByGame(myGame);
+
+        int i;
+        if(gamePlayers!=null)
+        {
+            for(i=0;i<gamePlayers.size();i++)
+            {
+                if (!gamePlayers.get(i).getPlayer().getUserName().equals(username)) {
+                    opponent = gamePlayers.get(i);
+                }
+            }
+        }
+
+        return opponent;
+
+    }
+
     private Letter getLetter(){
         List<Letter> allLetters;
         Letter selectedLetter;
         allLetters =letterRepository.findAll();
 
-        selectedLetter = letterRepository.findById(rand.nextLong(allLetters.size())).get();
+        selectedLetter = letterRepository.findById(rand.nextLong(allLetters.size())).orElse(null);
         return selectedLetter;
     }
 
     private Game getGameFromGameId(Long gameId){
         Game myGame;
         if(gameRepository.findById(gameId).isPresent()){
-            myGame = gameRepository.findById(gameId).get();
+            myGame = gameRepository.findById(gameId).orElse(null);
         }
         else
         {
@@ -252,9 +279,8 @@ public class GameServiceImpl implements GameService {
 
         gameMoves.forEach(y -> moveLocations.addAll(moveLocationRepository.getMoveLocationsByMlMove(y)) );
 
-        myLogger.info("Move locations: {}", Arrays.toString(moveLocations.toArray()));
         if(moveLocations.isEmpty())
-        {return myGameGrid;}
+        {return null;}
         else
         {
             moveLocations.forEach(z -> {
@@ -374,6 +400,8 @@ public class GameServiceImpl implements GameService {
                         case 36 :
                             myGameGrid.setG36(z.getMlLetter().getAlphabet());
                             break;
+                        default:
+                            throw new InvalidMoveException("Invalid grid Index sent.");
                     }
                 }
             });
@@ -383,15 +411,15 @@ public class GameServiceImpl implements GameService {
     }
 
 
-    private List<Integer> validateNewGameGrid(GameGrid dbGameGrid, GameGrid newGameGrid) {
+    private List<Integer> validateNewGameGrid(GameGrid dbGameGrid, GameGrid newGameGrid, boolean firstMove) {
 
-        List<Integer> index = new ArrayList<Integer>();
-        List<Character> newPosChar = new ArrayList<Character>();
+        List<Integer> index = new ArrayList<>();
+        final String errorMessage = "You cannot play at a position already played!";
 
         //Check for overwrites on existing grid values
         if (dbGameGrid.getG1() != null && !dbGameGrid.getG1().equals(newGameGrid.getG1())) {
             myLogger.error("Player tried to play at pos 1 which had a value");
-            throw new InvalidMoveException("You cannot play at a position already played!");
+            throw new InvalidMoveException(errorMessage);
         } else if (dbGameGrid.getG1() == null && newGameGrid.getG1()!=null) {
             index.add(1);
         }
@@ -399,7 +427,7 @@ public class GameServiceImpl implements GameService {
         //Check for overwrites on existing grid values
         if (dbGameGrid.getG2() != null && !dbGameGrid.getG2().equals(newGameGrid.getG2())) {
             myLogger.error("Player tried to play at pos 2 which had a value");
-            throw new InvalidMoveException("You cannot play at a position already played!");
+            throw new InvalidMoveException(errorMessage);
         } else if (dbGameGrid.getG2() == null && newGameGrid.getG2()!=null) {
             index.add(2);
         }
@@ -407,7 +435,7 @@ public class GameServiceImpl implements GameService {
         //Check for overwrites on existing grid values
         if (dbGameGrid.getG3() != null && !dbGameGrid.getG3().equals(newGameGrid.getG3())) {
             myLogger.error("Player tried to play at pos 3 which had a value");
-            throw new InvalidMoveException("You cannot play at a position already played!");
+            throw new InvalidMoveException(errorMessage);
         } else if (dbGameGrid.getG3() == null && newGameGrid.getG3()!=null) {
             index.add(3);
         }
@@ -415,7 +443,7 @@ public class GameServiceImpl implements GameService {
         //Check for overwrites on existing grid values
         if (dbGameGrid.getG4() != null && !dbGameGrid.getG4().equals(newGameGrid.getG4())) {
             myLogger.error("Player tried to play at pos 4 which had a value");
-            throw new InvalidMoveException("You cannot play at a position already played!");
+            throw new InvalidMoveException(errorMessage);
         } else if (dbGameGrid.getG4() == null && newGameGrid.getG4()!=null) {
             index.add(4);
         }
@@ -423,7 +451,7 @@ public class GameServiceImpl implements GameService {
         //Check for overwrites on existing grid values
         if (dbGameGrid.getG5() != null && !dbGameGrid.getG5().equals(newGameGrid.getG5())) {
             myLogger.error("Player tried to play at pos 5 which had a value");
-            throw new InvalidMoveException("You cannot play at a position already played!");
+            throw new InvalidMoveException(errorMessage);
         } else if (dbGameGrid.getG5() == null && newGameGrid.getG5()!=null) {
             index.add(5);
         }
@@ -431,7 +459,7 @@ public class GameServiceImpl implements GameService {
         //Check for overwrites on existing grid values
         if (dbGameGrid.getG6() != null && !dbGameGrid.getG6().equals(newGameGrid.getG6())) {
             myLogger.error("Player tried to play at pos 6 which had a value");
-            throw new InvalidMoveException("You cannot play at a position already played!");
+            throw new InvalidMoveException(errorMessage);
         } else if (dbGameGrid.getG6() == null && newGameGrid.getG6()!=null) {
             index.add(6);
         }
@@ -439,7 +467,7 @@ public class GameServiceImpl implements GameService {
         //Check for overwrites on existing grid values
         if (dbGameGrid.getG7() != null && !dbGameGrid.getG7().equals(newGameGrid.getG7())) {
             myLogger.error("Player tried to play at pos 7 which had a value");
-            throw new InvalidMoveException("You cannot play at a position already played!");
+            throw new InvalidMoveException(errorMessage);
         } else if (dbGameGrid.getG7() == null && newGameGrid.getG7()!=null) {
             index.add(7);
         }
@@ -447,7 +475,7 @@ public class GameServiceImpl implements GameService {
         //Check for overwrites on existing grid values
         if (dbGameGrid.getG8() != null && !dbGameGrid.getG8().equals(newGameGrid.getG8())) {
             myLogger.error("Player tried to play at pos 8 which had a value");
-            throw new InvalidMoveException("You cannot play at a position already played!");
+            throw new InvalidMoveException(errorMessage);
         } else if (dbGameGrid.getG8() == null && newGameGrid.getG8()!=null) {
             index.add(8);
         }
@@ -455,7 +483,7 @@ public class GameServiceImpl implements GameService {
         //Check for overwrites on existing grid values
         if (dbGameGrid.getG9() != null && !dbGameGrid.getG9().equals(newGameGrid.getG9())) {
             myLogger.error("Player tried to play at pos 9 which had a value");
-            throw new InvalidMoveException("You cannot play at a position already played!");
+            throw new InvalidMoveException(errorMessage);
         } else if (dbGameGrid.getG9() == null && newGameGrid.getG9()!=null) {
             index.add(9);
         }
@@ -463,7 +491,7 @@ public class GameServiceImpl implements GameService {
         //Check for overwrites on existing grid values
         if (dbGameGrid.getG10() != null && !dbGameGrid.getG10().equals(newGameGrid.getG10())) {
             myLogger.error("Player tried to play at pos 10 which had a value");
-            throw new InvalidMoveException("You cannot play at a position already played!");
+            throw new InvalidMoveException(errorMessage);
         } else if (dbGameGrid.getG10() == null && newGameGrid.getG10()!=null) {
             index.add(10);
         }
@@ -471,7 +499,7 @@ public class GameServiceImpl implements GameService {
         //Check for overwrites on existing grid values
         if (dbGameGrid.getG11() != null && !dbGameGrid.getG11().equals(newGameGrid.getG11())) {
             myLogger.error("Player tried to play at pos 11 which had a value");
-            throw new InvalidMoveException("You cannot play at a position already played!");
+            throw new InvalidMoveException(errorMessage);
         } else if (dbGameGrid.getG11() == null && newGameGrid.getG11()!=null) {
             index.add(11);
         }
@@ -479,7 +507,7 @@ public class GameServiceImpl implements GameService {
         //Check for overwrites on existing grid values
         if (dbGameGrid.getG12() != null && !dbGameGrid.getG12().equals(newGameGrid.getG12())) {
             myLogger.error("Player tried to play at pos 12 which had a value");
-            throw new InvalidMoveException("You cannot play at a position already played!");
+            throw new InvalidMoveException(errorMessage);
         } else if (dbGameGrid.getG12() == null && newGameGrid.getG12()!=null) {
             index.add(12);
         }
@@ -487,7 +515,7 @@ public class GameServiceImpl implements GameService {
         //Check for overwrites on existing grid values
         if (dbGameGrid.getG13() != null && !dbGameGrid.getG13().equals(newGameGrid.getG13())) {
             myLogger.error("Player tried to play at pos 13 which had a value");
-            throw new InvalidMoveException("You cannot play at a position already played!");
+            throw new InvalidMoveException(errorMessage);
         } else if (dbGameGrid.getG13() == null && newGameGrid.getG13()!=null) {
             index.add(13);
         }
@@ -495,7 +523,7 @@ public class GameServiceImpl implements GameService {
         //Check for overwrites on existing grid values
         if (dbGameGrid.getG14() != null && !dbGameGrid.getG14().equals(newGameGrid.getG14())) {
             myLogger.error("Player tried to play at pos 14 which had a value");
-            throw new InvalidMoveException("You cannot play at a position already played!");
+            throw new InvalidMoveException(errorMessage);
         } else if (dbGameGrid.getG14() == null && newGameGrid.getG14()!=null) {
             index.add(14);
         }
@@ -503,7 +531,7 @@ public class GameServiceImpl implements GameService {
         //Check for overwrites on existing grid values
         if (dbGameGrid.getG15() != null && !dbGameGrid.getG15().equals(newGameGrid.getG15())) {
             myLogger.error("Player tried to play at pos 15 which had a value");
-            throw new InvalidMoveException("You cannot play at a position already played!");
+            throw new InvalidMoveException(errorMessage);
         } else if (dbGameGrid.getG15() == null && newGameGrid.getG15()!=null) {
             index.add(15);
         }
@@ -511,7 +539,7 @@ public class GameServiceImpl implements GameService {
         //Check for overwrites on existing grid values
         if (dbGameGrid.getG16() != null && !dbGameGrid.getG16().equals(newGameGrid.getG16())) {
             myLogger.error("Player tried to play at pos 16 which had a value");
-            throw new InvalidMoveException("You cannot play at a position already played!");
+            throw new InvalidMoveException(errorMessage);
         } else if (dbGameGrid.getG16() == null && newGameGrid.getG16()!=null) {
             index.add(16);
         }
@@ -519,7 +547,7 @@ public class GameServiceImpl implements GameService {
         //Check for overwrites on existing grid values
         if (dbGameGrid.getG17() != null && !dbGameGrid.getG17().equals(newGameGrid.getG17())) {
             myLogger.error("Player tried to play at pos 17 which had a value");
-            throw new InvalidMoveException("You cannot play at a position already played!");
+            throw new InvalidMoveException(errorMessage);
         } else if (dbGameGrid.getG17() == null && newGameGrid.getG17()!=null) {
             index.add(17);
         }
@@ -527,7 +555,7 @@ public class GameServiceImpl implements GameService {
         //Check for overwrites on existing grid values
         if (dbGameGrid.getG18() != null && !dbGameGrid.getG18().equals(newGameGrid.getG18())) {
             myLogger.error("Player tried to play at pos 18 which had a value");
-            throw new InvalidMoveException("You cannot play at a position already played!");
+            throw new InvalidMoveException(errorMessage);
         } else if (dbGameGrid.getG18() == null && newGameGrid.getG18()!=null) {
             index.add(18);
         }
@@ -535,7 +563,7 @@ public class GameServiceImpl implements GameService {
         //Check for overwrites on existing grid values
         if (dbGameGrid.getG19() != null && !dbGameGrid.getG19().equals(newGameGrid.getG19())) {
             myLogger.error("Player tried to play at pos 19 which had a value");
-            throw new InvalidMoveException("You cannot play at a position already played!");
+            throw new InvalidMoveException(errorMessage);
         } else if (dbGameGrid.getG19() == null && newGameGrid.getG19()!=null) {
             index.add(19);
         }
@@ -543,7 +571,7 @@ public class GameServiceImpl implements GameService {
         //Check for overwrites on existing grid values
         if (dbGameGrid.getG20() != null && !dbGameGrid.getG20().equals(newGameGrid.getG20())) {
             myLogger.error("Player tried to play at pos 20 which had a value");
-            throw new InvalidMoveException("You cannot play at a position already played!");
+            throw new InvalidMoveException(errorMessage);
         } else if (dbGameGrid.getG20() == null && newGameGrid.getG20()!=null) {
             index.add(20);
         }
@@ -551,7 +579,7 @@ public class GameServiceImpl implements GameService {
         //Check for overwrites on existing grid values
         if (dbGameGrid.getG21() != null && !dbGameGrid.getG21().equals(newGameGrid.getG21())) {
             myLogger.error("Player tried to play at pos 21 which had a value");
-            throw new InvalidMoveException("You cannot play at a position already played!");
+            throw new InvalidMoveException(errorMessage);
         } else if (dbGameGrid.getG21() == null && newGameGrid.getG21()!=null) {
             index.add(21);
         }
@@ -559,7 +587,7 @@ public class GameServiceImpl implements GameService {
         //Check for overwrites on existing grid values
         if (dbGameGrid.getG22() != null && !dbGameGrid.getG22().equals(newGameGrid.getG22())) {
             myLogger.error("Player tried to play at pos 22 which had a value");
-            throw new InvalidMoveException("You cannot play at a position already played!");
+            throw new InvalidMoveException(errorMessage);
         } else if (dbGameGrid.getG22() == null && newGameGrid.getG22()!=null) {
             index.add(22);
         }
@@ -567,7 +595,7 @@ public class GameServiceImpl implements GameService {
         //Check for overwrites on existing grid values
         if (dbGameGrid.getG23() != null && !dbGameGrid.getG23().equals(newGameGrid.getG23())) {
             myLogger.error("Player tried to play at pos 23 which had a value");
-            throw new InvalidMoveException("You cannot play at a position already played!");
+            throw new InvalidMoveException(errorMessage);
         } else if (dbGameGrid.getG23() == null && newGameGrid.getG23()!=null) {
             index.add(23);
         }
@@ -575,7 +603,7 @@ public class GameServiceImpl implements GameService {
         //Check for overwrites on existing grid values
         if (dbGameGrid.getG24() != null && !dbGameGrid.getG24().equals(newGameGrid.getG24())) {
             myLogger.error("Player tried to play at pos 24 which had a value");
-            throw new InvalidMoveException("You cannot play at a position already played!");
+            throw new InvalidMoveException(errorMessage);
         } else if (dbGameGrid.getG24() == null && newGameGrid.getG24()!=null) {
             index.add(24);
         }
@@ -583,7 +611,7 @@ public class GameServiceImpl implements GameService {
         //Check for overwrites on existing grid values
         if (dbGameGrid.getG25() != null && !dbGameGrid.getG25().equals(newGameGrid.getG25())) {
             myLogger.error("Player tried to play at pos 25 which had a value");
-            throw new InvalidMoveException("You cannot play at a position already played!");
+            throw new InvalidMoveException(errorMessage);
         } else if (dbGameGrid.getG25() == null && newGameGrid.getG25()!=null) {
             index.add(25);
         }
@@ -592,7 +620,7 @@ public class GameServiceImpl implements GameService {
         //Check for overwrites on existing grid values
         if (dbGameGrid.getG26() != null && !dbGameGrid.getG26().equals(newGameGrid.getG26())) {
             myLogger.error("Player tried to play at pos 26 which had a value");
-            throw new InvalidMoveException("You cannot play at a position already played!");
+            throw new InvalidMoveException(errorMessage);
         } else if (dbGameGrid.getG26() == null && newGameGrid.getG26()!=null) {
             index.add(26);
         }
@@ -600,7 +628,7 @@ public class GameServiceImpl implements GameService {
         //Check for overwrites on existing grid values
         if (dbGameGrid.getG27() != null && !dbGameGrid.getG27().equals(newGameGrid.getG27())) {
             myLogger.error("Player tried to play at pos 27 which had a value");
-            throw new InvalidMoveException("You cannot play at a position already played!");
+            throw new InvalidMoveException(errorMessage);
         } else if (dbGameGrid.getG27() == null && newGameGrid.getG27()!=null) {
             index.add(27);
         }
@@ -608,7 +636,7 @@ public class GameServiceImpl implements GameService {
         //Check for overwrites on existing grid values
         if (dbGameGrid.getG28() != null && !dbGameGrid.getG28().equals(newGameGrid.getG28())) {
             myLogger.error("Player tried to play at pos 28 which had a value");
-            throw new InvalidMoveException("You cannot play at a position already played!");
+            throw new InvalidMoveException(errorMessage);
         } else if (dbGameGrid.getG28() == null && newGameGrid.getG28()!=null) {
             index.add(28);
         }
@@ -616,7 +644,7 @@ public class GameServiceImpl implements GameService {
         //Check for overwrites on existing grid values
         if (dbGameGrid.getG29() != null && !dbGameGrid.getG29().equals(newGameGrid.getG29())) {
             myLogger.error("Player tried to play at pos 29 which had a value");
-            throw new InvalidMoveException("You cannot play at a position already played!");
+            throw new InvalidMoveException(errorMessage);
         } else if (dbGameGrid.getG29() == null && newGameGrid.getG29()!=null) {
             index.add(29);
         }
@@ -624,7 +652,7 @@ public class GameServiceImpl implements GameService {
         //Check for overwrites on existing grid values
         if (dbGameGrid.getG30() != null && !dbGameGrid.getG30().equals(newGameGrid.getG30())) {
             myLogger.error("Player tried to play at pos 30 which had a value");
-            throw new InvalidMoveException("You cannot play at a position already played!");
+            throw new InvalidMoveException(errorMessage);
         } else if (dbGameGrid.getG30() == null && newGameGrid.getG30()!=null) {
             index.add(30);
         }
@@ -632,7 +660,7 @@ public class GameServiceImpl implements GameService {
         //Check for overwrites on existing grid values
         if (dbGameGrid.getG31() != null && !dbGameGrid.getG31().equals(newGameGrid.getG31())) {
             myLogger.error("Player tried to play at pos 31 which had a value");
-            throw new InvalidMoveException("You cannot play at a position already played!");
+            throw new InvalidMoveException(errorMessage);
         } else if (dbGameGrid.getG31() == null && newGameGrid.getG31()!=null) {
             index.add(31);
         }
@@ -640,35 +668,35 @@ public class GameServiceImpl implements GameService {
         //Check for overwrites on existing grid values
         if (dbGameGrid.getG32() != null && !dbGameGrid.getG32().equals(newGameGrid.getG32())) {
             myLogger.error("Player tried to play at pos 32 which had a value");
-            throw new InvalidMoveException("You cannot play at a position already played!");
+            throw new InvalidMoveException(errorMessage);
         } else if (dbGameGrid.getG32() == null && newGameGrid.getG32()!=null) {
             index.add(32);
         }
         //Check for overwrites on existing grid values
         if (dbGameGrid.getG33() != null && !dbGameGrid.getG33().equals(newGameGrid.getG33())) {
             myLogger.error("Player tried to play at pos 33 which had a value");
-            throw new InvalidMoveException("You cannot play at a position already played!");
+            throw new InvalidMoveException(errorMessage);
         } else if (dbGameGrid.getG33() == null && newGameGrid.getG33()!=null) {
             index.add(33);
         }
         //Check for overwrites on existing grid values
         if (dbGameGrid.getG34() != null && !dbGameGrid.getG34().equals(newGameGrid.getG34())) {
             myLogger.error("Player tried to play at pos 34 which had a value");
-            throw new InvalidMoveException("You cannot play at a position already played!");
+            throw new InvalidMoveException(errorMessage);
         } else if (dbGameGrid.getG34() == null && newGameGrid.getG34()!=null) {
             index.add(34);
         }
         //Check for overwrites on existing grid values
         if (dbGameGrid.getG35() != null && !dbGameGrid.getG35().equals(newGameGrid.getG35())) {
             myLogger.error("Player tried to play at pos 35 which had a value");
-            throw new InvalidMoveException("You cannot play at a position already played!");
+            throw new InvalidMoveException(errorMessage);
         } else if (dbGameGrid.getG35() == null && newGameGrid.getG35()!=null) {
             index.add(35);
         }
         //Check for overwrites on existing grid values
         if (dbGameGrid.getG36() != null && !dbGameGrid.getG36().equals(newGameGrid.getG36())) {
             myLogger.error("Player tried to play at pos 36 which had a value");
-            throw new InvalidMoveException("You cannot play at a position already played!");
+            throw new InvalidMoveException(errorMessage);
         } else if (dbGameGrid.getG36() == null && newGameGrid.getG36()!=null) {
             index.add(36);
         }
@@ -696,7 +724,7 @@ public class GameServiceImpl implements GameService {
                         }
                     }
 
-                    if(!checkForGridIndexNextToExistingMove(index,dbGameGrid)){
+                    if(!checkForGridIndexNextToExistingMove(index,dbGameGrid) && !firstMove){
                         throw new InvalidMoveException("You need to play next to an existing move on board.");
                     }
                 }
@@ -707,7 +735,7 @@ public class GameServiceImpl implements GameService {
             }
             else if (index.size() == 1){
                 myLogger.info("1 character move by player");
-                if(!checkForGridIndexNextToExistingMove(index,dbGameGrid)){
+                if(!checkForGridIndexNextToExistingMove(index,dbGameGrid) && !firstMove){
                     throw new InvalidMoveException("You need to make a play next to an existing move on board.");
                 }
             }}
@@ -737,7 +765,7 @@ public class GameServiceImpl implements GameService {
         }
         catch(Exception e)
         {
-            throw new InvalidMoveException("Some Error Occured. Please contact Game Admin.");
+            throw new InvalidMoveException("Some Error Occurred. Please contact Game Admin.");
         }
 
         return null;
@@ -817,10 +845,8 @@ public class GameServiceImpl implements GameService {
     }
 
 
-
-
     private int getclosestmultipleto6(int n){
-        int closestMultiple=0;
+        int closestMultiple;
 
         if(n < 6)
         {
@@ -840,7 +866,7 @@ public class GameServiceImpl implements GameService {
     }
 
     private Boolean checkForHorizontalList(List<Integer> indexList){
-        int i = 0;
+        int i;
         int charIndex = indexList.get(0);
         List<Integer> validIndexes =  new ArrayList<>();
         int closestMultiple;
@@ -864,7 +890,7 @@ public class GameServiceImpl implements GameService {
     }
 
     private Boolean checkForVerticalList(List<Integer> indexList){
-        int i = 0;
+        int i;
         int charIndex = indexList.get(0);
         List<Integer> validIndexes =  new ArrayList<>();
 
@@ -891,7 +917,6 @@ public class GameServiceImpl implements GameService {
         List<Character> playerChars =  new ArrayList<>();
         playerLetters = playerLettersRepository.findPlayerLettersByPlGamePlayerAndUsedIsFalse(myGamePlayer);
 
-        int i;
         if(playerLetters==null)
         {
             throw new InvalidMoveException("Player does not have any letters left to play.");
@@ -910,6 +935,25 @@ public class GameServiceImpl implements GameService {
             }
         });
 
+    }
+
+    private void updatePlayerLettersWithUsed(List<Character> playChars, GamePlayer myGamePlayer)
+    {
+        List<PlayerLetter> playerLetters;
+        playerLetters = playerLettersRepository.findPlayerLettersByPlGamePlayerAndUsedIsFalse(myGamePlayer);
+
+        int i;
+        int j;
+
+        for(i=0;i<playChars.size();i++) {
+            for (j = 0; j < playerLetters.size(); j++) {
+                if (!playerLetters.get(j).getUsed() && playerLetters.get(j).getPlLetter().getAlphabet().equals(playChars.get(i))) {
+                    playerLetters.get(j).setUsed(true);
+                    break;
+                }
+            }
+        }
+        playerLettersRepository.saveAll(playerLetters);
     }
 
     private List<String> getWordsPlayed(List<Integer> indexList, GameGrid myGamegrid){
@@ -1040,7 +1084,6 @@ public class GameServiceImpl implements GameService {
                 }
 
                 if (word1.size() > 1) {
-                    //myWords.add(word1.toString());
                     myWords.add(word1.stream()
                             .map(String::valueOf)
                             .collect(Collectors.joining()));
@@ -1055,24 +1098,24 @@ public class GameServiceImpl implements GameService {
     {
         int i;
         boolean match = true;
-        StringJoiner invalidWords = new StringJoiner(", ");   //StringeJoiner object
+        StringJoiner invalidWords = new StringJoiner(", ");
 
 
         for(i=0; i< myWords.size();i++)
         {
-            String wordUri = this.DictionaryUri + myWords.get(i);
+            String wordUri = this.dictionaryUri + myWords.get(i);
             RestTemplate dictionaryAPI = new RestTemplate();
             try {
-                String result = dictionaryAPI.execute(wordUri, HttpMethod.GET, null, null);
+                dictionaryAPI.execute(wordUri, HttpMethod.GET, null, null);
             }
             catch(Exception e)
-            {     invalidWords.add(myWords.get(i).toString());
+            {     invalidWords.add(myWords.get(i));
                 match=false;}
         }
 
         if(!match)
         {
-            throw new InvalidMoveException("Invalid word(s) - " + invalidWords.toString());
+            throw new InvalidMoveException("Invalid word(s) - " + invalidWords);
         }
 
         return true;
@@ -1084,27 +1127,42 @@ public class GameServiceImpl implements GameService {
     public void submitMove(GameGrid myGamegrid, Long gameId, String username){
 
         GamePlayer myGamePlayer;
+        GamePlayer opponentGamePlayer;
         GameGrid dbGameGrid;
+        Game myGame;
+
+        myGame = getGameFromGameId(gameId);
+
+        if (myGame == null){
+            throw  new GameNotFoundException(""+gameId);
+        }
 
         List<MoveLocation> moveLocations = new ArrayList<>();
         List<MoveWord> moveWords = new ArrayList<>();
 
         myGamePlayer = getGamePlayerFromUsername(username,gameId);
+        opponentGamePlayer = getOpponentPlayerFromUsername(username,gameId);
 
         List<Character> newPosChars = new ArrayList<>();
         List<Integer> newPosIndex;
+        boolean firstMove = false;
 
 
         if(Objects.isNull(myGamePlayer))
-        {throw new UnauthorizedAccessException("User not a player in this game");}
+        {throw new UnauthorizedAccessException("Either game does not exist or user not a player in this game");}
         else
         {
             if (!myGamePlayer.getIsTurn()){
                 throw new UnauthorizedAccessException("It's not your turn!");}
         }
         dbGameGrid = getGameGridFromGameId(gameId);
+        if(dbGameGrid == null)
+        {
+            dbGameGrid = new GameGrid();
+            firstMove =  true;
+        }
 
-        newPosIndex = validateNewGameGrid(dbGameGrid,myGamegrid);
+        newPosIndex = validateNewGameGrid(dbGameGrid,myGamegrid,firstMove);
         newPosIndex.forEach(x -> newPosChars.add(invokeGridGetter(x,myGamegrid)));
 
         validateCharactersInPlayerLetter(newPosChars,myGamePlayer);
@@ -1123,7 +1181,7 @@ public class GameServiceImpl implements GameService {
         for(i=0;i<newPosIndex.size();i++)
         {
             Letter letter = letterRepository.findByAlphabet(Character.toUpperCase(newPosChars.get(i)));
-            Grid grid = gridRepository.findById(newPosIndex.get(i).longValue()).get();
+            Grid grid = gridRepository.findById(newPosIndex.get(i).longValue()).orElse(null);
             MoveLocation moveLocation = new MoveLocation();
             moveLocation.setMlLetter(letter);
             moveLocation.setMlGridIndex(grid);
@@ -1131,8 +1189,8 @@ public class GameServiceImpl implements GameService {
             moveLocations.add(moveLocation);
         }
 
-        int j=0;
-        int totalScore = 0;
+        int j;
+        int totalScore=0;
         for(j=0;j<moveWordsList.size();j++)
         {
             MoveWord moveWord =  new MoveWord();
@@ -1148,47 +1206,86 @@ public class GameServiceImpl implements GameService {
         gameMove.setTotalScore(totalScore);
         gameMovesRepository.save(gameMove);
 
+        updatePlayerLettersWithUsed(newPosChars,myGamePlayer);
 
-        //TODO: //DONE get gameplayer from user, gameid - throw exception is user not in game
-        //TODO: //DONE check if it is game player's turn
-        //TODO: //DONE get game state - grid from DB
-        //TODO: //Done find what letters are new
-        //TODO: //Done validate no grid index is overwritten
-        //TODO: //Done get gameplayer letters. validate if letters played are with player
-        //TODO: //Done check if atleast one letter is next to an already placed letter
-        //TODO: //Done get word(s) played
-        //TODO: //Done check if words in dictionary https://api.dictionaryapi.dev/api/v2/entries/en/<word>
-        //TODO: //Done add new move entry
-        //TODO: //Done add new move location
-        //TODO: //Done add new move words
-        //TODO: //Done Update score
-        //TODO: Set letter to used
-        //TODO: Update turn
-        //TODO: validate if game is over
-        //TODO: update win/loss/draw is game is over
+        myGamePlayer.setIsTurn(false);
 
+        if(opponentGamePlayer!=null){
+            opponentGamePlayer.setIsTurn(true);
+        }
+        gamePlayerRepository.save(myGamePlayer);
 
-//
-//
-//
-//        myGamePlayers = gamePlayerRepository.findGamePlayersByGame(myGame);
-//
-//        if(myGamePlayers.isEmpty())
-//        {
-//            throw new NullPointerException("No users in the game");
-//        }
-//
-//        List<Player> players = new ArrayList<>();
-//        myGamePlayers.forEach((x) -> players.add(x.getPlayer()));
-//
-//
-//        if (myGame.isFinished() == false && !players.contains(myPlayer))
-//        {
-//            throw new UnauthorizedAccessException("game");
-//        }
-//
-//        return myGame;
+        if(opponentGamePlayer!=null) {
+            gamePlayerRepository.save(opponentGamePlayer);
+        }
 
+        if(myGamePlayer.getGameMoves()!=null && myGamePlayer.getGameMoves().size() ==2
+                && opponentGamePlayer!= null
+                && opponentGamePlayer.getGameMoves() !=null && opponentGamePlayer.getGameMoves().size() ==3)
+        {
+            //Game Over
+            Integer myScore;
+            Integer opponentScore;
+
+            myLogger.info("Game id: {} is over", gameId);
+
+            myScore = getPlayerScore(myGamePlayer);
+            opponentScore = getPlayerScore(opponentGamePlayer);
+
+            Player myPlayer = myGamePlayer.getPlayer();
+            Player opponentPlayer = opponentGamePlayer.getPlayer();
+
+            if(myScore > opponentScore)
+            {
+                //Current Player wins
+                myLogger.info("{} won the game {}",username,gameId);
+                myPlayer.setWins(myPlayer.getWins()+1);
+                opponentPlayer.setLosses(opponentPlayer.getLosses()+1);
+                myGame.setIsDraw(false);
+                myGame.setIsFinished(true);
+
+                playerRepository.save(myPlayer);
+                playerRepository.save(opponentPlayer);
+                gameRepository.save(myGame);
+            }
+            else if (opponentScore>myScore)
+            {
+                //Opponent Wins
+                myLogger.info("{} lost the game {} ",username, gameId);
+                opponentPlayer.setWins(opponentPlayer.getWins()+1);
+                myPlayer.setLosses(myPlayer.getLosses()+1);
+                myGame.setIsDraw(false);
+                myGame.setIsFinished(true);
+                playerRepository.save(myPlayer);
+                playerRepository.save(opponentPlayer);
+                gameRepository.save(myGame);
+            }
+            else
+            {
+                myLogger.info("Game {} is a draw!",gameId);
+                myGame.setIsDraw(true);
+                myGame.setIsFinished(true);
+                gameRepository.save(myGame);
+                //Match Draw
+            }
+
+        }
+
+    }
+
+    private Integer getPlayerScore(GamePlayer myGamePlayer)
+    {
+        List<GameMove> gameMoves = null;
+        Integer playerScore = 0;
+        gameMoves = myGamePlayer.getGameMoves();
+
+        if(gameMoves !=null)
+        {
+            for(GameMove move : gameMoves) {
+            playerScore += move.getTotalScore();
+        }}
+
+        return playerScore;
     }
 
     @Override
@@ -1203,10 +1300,14 @@ public class GameServiceImpl implements GameService {
 
         Integer player1Score = 0;
         Integer player2Score = 0;
-        boolean gameStatus;
 
         myPlayer = playerRepository.findByUserName(username);
         myGame = getGameFromGameId(gameId);
+
+        if (myGame == null){
+            throw  new GameNotFoundException(""+gameId);
+        }
+
         myGamePlayers = gamePlayerRepository.findGamePlayersByGame(myGame);
         List<GameMove> player1moves = new ArrayList<>();
         List<GameMove> player2moves =  new ArrayList<>();
@@ -1220,7 +1321,7 @@ public class GameServiceImpl implements GameService {
             throw new InvalidUserDetailsException("No users in the game");
         }
 
-        myGamePlayers.forEach((x) -> players.add(x.getPlayer()));
+        myGamePlayers.forEach(x -> players.add(x.getPlayer()));
 
         if (myGame.getIsFinished() == false && !players.contains(myPlayer))
         {
@@ -1229,14 +1330,13 @@ public class GameServiceImpl implements GameService {
         else
         {
             //Get player scores
-            if(myGamePlayers.size()>0 && myGamePlayers.get(0)!=null) {
+            if(!myGamePlayers.isEmpty() && myGamePlayers.get(0)!=null) {
                 player1moves = myGamePlayers.get(0).getGameMoves();
             }
             if(myGamePlayers.size()>1 && myGamePlayers.get(1)!=null) {
                 player2moves = myGamePlayers.get(1).getGameMoves();
             }
 
-            int i;
             if (player1moves!=null && player1moves.size()>0)
             {
                 for(GameMove move : player1moves)
@@ -1288,7 +1388,7 @@ public class GameServiceImpl implements GameService {
             }
 
             //Sort moves in reverse order of move id
-            if (gameMovesResponse!=null && gameMovesResponse.size()>0)
+            if (gameMovesResponse.size()>0)
             {
                 Collections.sort(gameMovesResponse,(x,y) -> {return x.getId().intValue() - y.getId().intValue();});
             }
@@ -1309,7 +1409,7 @@ public class GameServiceImpl implements GameService {
 
             gameBoardResponse.setGameGrid(gameGrid);
 
-            if (myGame.getIsFinished() == false && players.contains(myPlayer))
+            if (!myGame.getIsFinished() && players.contains(myPlayer))
             {
                 myGamePlayer = getGamePlayerFromUsername(username,gameId);
 
@@ -1337,9 +1437,6 @@ public class GameServiceImpl implements GameService {
         }
 
         return gameBoardResponse;
-
-        //TODO: Add exception for non-existent game everywhere
-
 
     }
 

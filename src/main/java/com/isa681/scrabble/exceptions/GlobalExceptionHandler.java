@@ -44,7 +44,7 @@ public class GlobalExceptionHandler {
                                                                          WebRequest webRequest){
         ErrorDetail errorDetails = new ErrorDetail(new Date(), exception.getMessage(),
                 webRequest.getDescription(false));
-        return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
     }
 
 
