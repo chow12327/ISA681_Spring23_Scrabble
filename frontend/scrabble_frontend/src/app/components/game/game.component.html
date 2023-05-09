@@ -200,17 +200,11 @@
                     </div>
                 </div>
             </div>
-            <h5 class="mt-4">Game Moves</h5>
-            <div class="row mt-1  rounded " style="border: solid; height: 280px; overflow-y: scroll; ">
-                    <ul><p class="border-top-0 border-right-0 border-left-0" style="border:inset 2px" *ngFor="let gmmv of gamemoves">
-                        <b>{{gmmv.username}}:</b><br>{{gmmv.words}}
-                    </p></ul>
-            </div>
         </div>
     </div>
 
     <div class="row mt-0 ml-2">
-        <div class="col-md-3">
+        <div class="col-md-3 mt-5">
             <div class="row">
                 <label class="col col-form-label font-weight-bold">Your Letters</label>
             </div>
@@ -221,16 +215,27 @@
                 <label class="col col-form-label">{{letter4}}</label>
                 <label class="col col-form-label">{{letter5}}</label>
             </div>
-        </div>
-    </div>
 
-
-    <div class="row mt-5 ml-4">
-        <div class="col-md-3">
-            <div class="row">
-                <button (click)=submitMove() class="btn btn-success">Submit</button>
+            <div class="row mt-5 ml-3">
+                <div class="col-md">
+                    <div class="row">
+                        <button (click)=submitMove() class="btn btn-success">Submit</button>
+                    </div>
+                </div>
             </div>
         </div>
+
+        <div class="col-md-3 offset-md-6">
+        <h5 class="mt-4">Game Moves</h5>
+        <div class="row mt-1  rounded " style="border: solid; height: 280px; overflow-y: scroll; ">
+                <ul><p class="border-top-0 border-right-0 border-left-0" style="border:inset 2px" *ngFor="let gmmv of gamemoves">
+                    <b>{{gmmv.username}}:</b><br>{{gmmv.words}}
+                </p></ul>
+        </div>
+        </div>
     </div>
+
+
+   
 
 </div>
