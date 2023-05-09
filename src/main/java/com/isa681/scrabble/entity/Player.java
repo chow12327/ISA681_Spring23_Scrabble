@@ -61,10 +61,12 @@ public class Player {
 
     @Column(name="role")
     @Getter @Setter
+    @JsonIgnore
     private String role;
 
     @Column(name="enabled")
     @Getter @Setter
+    @JsonIgnore
     private int enabled;
 
     @JsonIgnore

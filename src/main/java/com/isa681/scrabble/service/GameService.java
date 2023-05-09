@@ -22,4 +22,6 @@ public interface GameService {
 
     GameBoardResponse getGameBoard(Long gameId, String username);
 
+    void timeoutGames();
+
 }

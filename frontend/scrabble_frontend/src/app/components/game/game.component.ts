@@ -61,7 +61,7 @@ export class GameComponent implements OnInit{
         this.score1 = data["player1Score"];
         this.player2 = data["player2Username"];
         this.score2 = data["player2Score"];
-        this.turn = data["turn"];
+        this.turn = !data["turn"];
         this.letter1 = data["l1"];
         this.letter2 = data["l2"];
         this.letter3 = data["l3"];

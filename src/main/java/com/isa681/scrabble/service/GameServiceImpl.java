@@ -15,7 +15,9 @@ import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Method;
 import java.security.SecureRandom;
+import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.slf4j.LoggerFactory;
@@ -95,8 +97,8 @@ public class GameServiceImpl implements GameService {
         }
     }
 
-
     @Override
+    @Transactional
     public void joinGame(Long gameId, String username) {
 
         Player myPlayer;
@@ -145,7 +147,6 @@ public class GameServiceImpl implements GameService {
             }
         }
     }
-
 
     @Override
     public Game getGameDetails (Long gameId, String username) {
@@ -409,7 +410,6 @@ public class GameServiceImpl implements GameService {
             return myGameGrid;
         }
     }
-
 
     private List<Integer> validateNewGameGrid(GameGrid dbGameGrid, GameGrid newGameGrid, boolean firstMove) {
 
@@ -735,8 +735,12 @@ public class GameServiceImpl implements GameService {
             }
             else if (index.size() == 1){
                 myLogger.info("1 character move by player");
-                if(!checkForGridIndexNextToExistingMove(index,dbGameGrid) && !firstMove){
-                    throw new InvalidMoveException("You need to make a play next to an existing move on board.");
+                if(firstMove)
+                {
+                    throw new InvalidMoveException("Word should have atleast 2 letters.");
+                }
+                else if (!checkForGridIndexNextToExistingMove(index,dbGameGrid)){
+                    throw new InvalidMoveException("You need to play next to an existing move on board.");
                 }
             }}
 
@@ -771,8 +775,7 @@ public class GameServiceImpl implements GameService {
         return null;
     }
 
-
-    private Boolean checkContiguity(List<Integer> indexList, GameGrid newGameGrid, Boolean isHorizontal)
+    private boolean checkContiguity(List<Integer> indexList, GameGrid newGameGrid, Boolean isHorizontal)
     {
         int firstIndex = indexList.get(0);
         int lastIndex = indexList.get(indexList.size() - 1);
@@ -809,8 +812,7 @@ public class GameServiceImpl implements GameService {
         return true;
     }
 
-
-    private Boolean checkForGridIndexNextToExistingMove(List<Integer> indexList, GameGrid dbGameGrid)
+    private boolean checkForGridIndexNextToExistingMove(List<Integer> indexList, GameGrid dbGameGrid)
     {
         int i;
         for(i=0;i<indexList.size();i++)
@@ -844,7 +846,6 @@ public class GameServiceImpl implements GameService {
         return false;
     }
 
-
     private int getclosestmultipleto6(int n){
         int closestMultiple;
 
@@ -865,7 +866,7 @@ public class GameServiceImpl implements GameService {
         return closestMultiple;
     }
 
-    private Boolean checkForHorizontalList(List<Integer> indexList){
+    private boolean checkForHorizontalList(List<Integer> indexList){
         int i;
         int charIndex = indexList.get(0);
         List<Integer> validIndexes =  new ArrayList<>();
@@ -889,7 +890,7 @@ public class GameServiceImpl implements GameService {
         return true;
     }
 
-    private Boolean checkForVerticalList(List<Integer> indexList){
+    private boolean checkForVerticalList(List<Integer> indexList){
         int i;
         int charIndex = indexList.get(0);
         List<Integer> validIndexes =  new ArrayList<>();
@@ -1137,6 +1138,11 @@ public class GameServiceImpl implements GameService {
             throw  new GameNotFoundException(""+gameId);
         }
 
+        if(myGame.getIsFinished())
+        {
+            throw  new InvalidMoveException("Game is over. No more moves can be played.");
+        }
+
         List<MoveLocation> moveLocations = new ArrayList<>();
         List<MoveWord> moveWords = new ArrayList<>();
 
@@ -1239,8 +1245,8 @@ public class GameServiceImpl implements GameService {
             {
                 //Current Player wins
                 myLogger.info("{} won the game {}",username,gameId);
-                myPlayer.setWins(myPlayer.getWins()+1);
-                opponentPlayer.setLosses(opponentPlayer.getLosses()+1);
+                myPlayer.setWins(Optional.ofNullable(myPlayer.getWins()).orElse(0)+1);
+                opponentPlayer.setLosses(Optional.ofNullable(opponentPlayer.getLosses()).orElse(0)+1);
                 myGame.setIsDraw(false);
                 myGame.setIsFinished(true);
 
@@ -1252,8 +1258,8 @@ public class GameServiceImpl implements GameService {
             {
                 //Opponent Wins
                 myLogger.info("{} lost the game {} ",username, gameId);
-                opponentPlayer.setWins(opponentPlayer.getWins()+1);
-                myPlayer.setLosses(myPlayer.getLosses()+1);
+                opponentPlayer.setWins(Optional.ofNullable(opponentPlayer.getWins()).orElse(0)+1);
+                myPlayer.setLosses(Optional.ofNullable(myPlayer.getLosses()).orElse(0)+1);
                 myGame.setIsDraw(false);
                 myGame.setIsFinished(true);
                 playerRepository.save(myPlayer);
@@ -1438,6 +1444,70 @@ public class GameServiceImpl implements GameService {
 
         return gameBoardResponse;
 
+    }
+
+    @Override
+    @Transactional
+    public void timeoutGames(){
+        List<Game> inProgressGames = gameRepository.findByisFinishedIsFalse();
+
+        for(Game game : inProgressGames)
+        {
+            if(game.getGamePlayers()!=null && game.getGamePlayers().size()>1)
+            {
+                GamePlayer gamePlayer1 = game.getGamePlayers().get(0);
+                GamePlayer gamePlayer2 = game.getGamePlayers().get(1);
+
+                Player player1 = gamePlayer1.getPlayer();
+                Player player2 = gamePlayer2.getPlayer();
+
+                if(hasPlayerTimedOut(gamePlayer1) || hasPlayerTimedOut(gamePlayer2))
+                {
+                    myLogger.info("Game {} timed out!", game.getId());
+                    game.setIsFinished(true);
+                    game.setIsDraw(false);
+
+                    if(hasPlayerTimedOut(gamePlayer1)){
+                        player2.setWins(Optional.ofNullable(player2.getWins()).orElse(0)+1);
+                        player1.setLosses(Optional.ofNullable(player1.getLosses()).orElse(0)+1);
+                    }
+
+                    if(hasPlayerTimedOut(gamePlayer2)){
+                        player1.setWins(Optional.ofNullable(player1.getWins()).orElse(0)+1);
+                        player2.setLosses(Optional.ofNullable(player2.getLosses()).orElse(0)+1);
+                    }
+                    gameRepository.save(game);
+                    playerRepository.save(player1);
+                    playerRepository.save(player2);
+                }
+            }
+
+        }
+
+        //TODO : get list of ongoing games
+        //TODO: get list of game players for each game
+        //TODO: check if player has turn.
+        //TODO: check update date > 3 mins from now
+        //TODO: player with timeout loses
+        //TODO: update infinished = true. draw = false
+        //TODO: update player loss and opponent win
+    }
+
+    private boolean hasPlayerTimedOut(GamePlayer gamePlayer)
+    {
+        if(gamePlayer.getIsTurn())
+        {
+            Date turnStartedAt = gamePlayer.getUpdateDate();
+            Instant instant = Instant.now();
+            TimeUnit timeUnit;
+
+            long diffInMillies = instant.toEpochMilli() - turnStartedAt.getTime();
+            //If difference in time > 3 mins
+            if (diffInMillies > 180000){
+                return true;
+            }
+        }
+        return false;
     }
 
 }

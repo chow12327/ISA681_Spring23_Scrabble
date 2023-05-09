@@ -72,4 +72,11 @@ public class GameController {
         return ResponseEntity.ok(myBoard);
     }
 
+    @GetMapping("/api/timeout")
+    public void timeoutGames(){
+        myLogger.info("Timeout invoked!");
+        gameService.timeoutGames();
+    }
+
+
 }
