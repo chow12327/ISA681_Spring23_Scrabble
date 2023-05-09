@@ -46,7 +46,7 @@ public class GameController {
 
     @PostMapping("/api/submitMove")
     public void submitMove(@RequestBody MoveRequest myMove){
-        //System.out.println(myMove);
+        myLogger.info("Request received to submit the move");
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         gameService.submitMove(myMove.getGameGrid(),myMove.getGameId(),username);
     }
@@ -66,7 +66,7 @@ public class GameController {
     public ResponseEntity<GameBoardResponse> getGameBoardResponse(@RequestParam Long gameId){
         GameBoardResponse myBoard = new GameBoardResponse();
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        myLogger.info("Info Hit gameboard");
+        myLogger.info("Request to get the GameBoardInfo of gameId"+gameId);
 
         myBoard = gameService.getGameBoard(gameId,username);
         return ResponseEntity.ok(myBoard);
