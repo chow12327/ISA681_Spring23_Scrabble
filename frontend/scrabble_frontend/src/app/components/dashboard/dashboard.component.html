@@ -1,43 +1,40 @@
 <div class="container">
-    <!--<div class="form-inline">
-        <a href="../dashboard" style="text-decoration:none"><h1 class="mt-3 mb-3">Welcome to Scrabble</h1></a>
-        <button (click)=lgout() class="btn btn-success" style="position:relative; left:55%">Logout</button>
-    </div>
-<button  (click)=lgout() class="btn btn-primary mr-4 mt-5 mb-1 ml-1 float-right" >Join Game</button>
--->
 
-    <div class="row">
+    <div class="row" >
         <div class="col-6 ">
-            <a href="../dashboard" style="text-decoration:none"><h1 class="mt-3 mb-3">Welcome to Scrabble</h1></a>
+            <a href="../dashboard" style="text-decoration:none">
+                <h1 class="mt-3 ">Welcome to Scrabble</h1></a>
         </div>
-     
-        <div class="col-md-3">
+        <div class="col">
+            <h4 class="mt-4 float-right">Hello {{username}}</h4>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col" >
             <div class="alert alert-danger" *ngIf="moveError">
                 {{moveErrorMessage}}
+            </div>
         </div>
-        </div>
+        <div class="col" >
+            <button  (click)=lgout() class="btn btn-primary float-right mb-1" >Logout</button>
+            <button  (click)="EnterGame()" class="btn btn-primary mr-4 mb-1 ml-1 float-right" >Join Game</button>
 
-        <div class="col offset-md-2">
-            <button  (click)=lgout() class="btn btn-primary float-right mt-5 mb-1" >Logout</button>
-            <button  (click)="EnterGame()" class="btn btn-primary mr-4 mt-5 mb-1 ml-1 float-right" >Join Game</button>
-            
-            <input type="number"  class="form-control float-right w-25 mt-5 mb-1 mr-1" id="gmid" name="gmid" min="0" [(ngModel)]="game.gmid" #gmid="ngModel">
+            <input type="number"  class="form-control float-right w-25 mb-1 mr-1" id="gmid" name="gmid" min="0" [(ngModel)]="game.gmid" #gmid="ngModel">
             <div *ngIf="gmid.invalid && (gmid.dirty || gmid.touched)" class="alert alert-danger">
                 <div *ngIf="gmid.errors?.['min']">
                     Enter valid game id
                 </div>
             </div>
-
         </div>
     </div>
 
     <div class="container">
-        <div class="row mt-5">
+        <div class="row mt-2 mb-2" >
             <div class="col">
-                <p>Player Wins and Losses</p>
+                <h5>Player Wins and Losses</h5>
             </div>
             <div class="col">
-                <p>View Historical Games</p>
+                <h5>View Historical Games</h5>
             </div>
             <div class="col">
                 <button (click)=startNewGame() class="btn btn-success">Start New Game</button>

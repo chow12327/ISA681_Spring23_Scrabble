@@ -32,7 +32,7 @@ export class GameComponent implements OnInit{
   letter3: string
   letter4: string
   letter5: string
-  
+
   gameid: string
 
   gamemoves: [MoveWords]
@@ -68,9 +68,8 @@ export class GameComponent implements OnInit{
         this.letter4 = data["l4"];
         this.letter5 = data["l5"];
         this.gameGrid = data["gameGrid"]
-  
-        this.gamemoves = data["moves"]
 
+        this.gamemoves = data["moves"]
 
       },
       error => {
@@ -101,8 +100,8 @@ export class GameComponent implements OnInit{
   //     }
   //   )
   // }
- 
-  
+
+
 
   lgout(){
     this.basicAuthenticationService.logout()
@@ -115,19 +114,19 @@ export class GameComponent implements OnInit{
   this.moveError = false
   this.moveErrorMessage = ""
 
-    var newMove = 
+    var newMove =
     {
         "gameId": this.gameid,
         "gameGrid": this.gameGrid
     };
-    
+
     this.gameService.submitmove(newMove).subscribe(
       data => {
         this.moveSuccess =  true;
         this.moveSuccessMessage = "Move submitted successfully!"
       },
       error => {
-        
+
         if (error.status == 401 ||  error.status == 0) {
           this.basicAuthenticationService.logout();
           this.router.navigate(['login']);
@@ -145,12 +144,12 @@ export class GameComponent implements OnInit{
 
   }
 
-  
+
 
   initializeGrid(){
 
     this.gameGrid
-    = { 
+    = {
       isg1Disabled : false,
       isg2Disabled : false,
       isg3Disabled : false,
@@ -223,7 +222,7 @@ export class GameComponent implements OnInit{
       g34 : "",
       g35 : "",
       g36 : ""}
-  
+
   }
 
 

@@ -16,7 +16,7 @@ import { GameService } from 'src/app/services/game.service';
 
 export class DashboardComponent implements OnInit {
 
-  game = { 
+  game = {
     gmid: ''
   };
 
@@ -26,6 +26,7 @@ export class DashboardComponent implements OnInit {
 
   moveError: boolean = false
   moveErrorMessage: string
+  username: any;
 
 
   constructor(private playerService: PlayerService,
@@ -40,6 +41,7 @@ export class DashboardComponent implements OnInit {
     this.listPlayers()
     this.listHistoricGames()
     this.listActiveGames()
+    this.username = this.basicAuthenticationService.getAuthenticatedUser();
   }
 
 
