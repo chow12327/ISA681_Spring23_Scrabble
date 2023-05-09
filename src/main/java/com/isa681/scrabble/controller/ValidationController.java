@@ -30,7 +30,7 @@ public class ValidationController {
             throw new IllegalArgumentException("Invalid Username. Only accepts alphanumeric characters and should be between 2 and 20 characters. ");
         }
 
-        if (password == null || !password.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,}$")) {
+        if (password == null || !password.matches("^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[#&@$])[A-Za-z\\d#&@$]{8,}$")) {
             throw new IllegalArgumentException("Invalid Password. Must contain at least 8 characters including an uppercase letter, a lowercase letter, a digit and a special characters among # & @ $");
         }
 
@@ -66,7 +66,7 @@ public class ValidationController {
             throw new IllegalArgumentException("Invalid Username. Only accepts alphanumeric characters and should be between 2 and 20 characters.");
         }
 
-        if (password == null || !password.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,}$")) {
+        if (password == null || !password.matches("^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[#&@$])[A-Za-z\\d#&@$]{8,}$")) {
             throw new IllegalArgumentException("Invalid Password");
         }
     }
