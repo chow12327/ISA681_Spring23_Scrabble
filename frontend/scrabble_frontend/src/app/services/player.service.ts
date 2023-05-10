@@ -14,7 +14,7 @@ export class PlayerService {
   constructor(private httpClient: HttpClient) { }
   
   getPlayerList(): Observable<Player[]> {
-    return this.httpClient.get<Player[]>(this.baseURL).pipe(
+    return this.httpClient.get<Player[]>(this.baseURL,{withCredentials: true}).pipe(
     //  map(response => response.players)
     );
   }

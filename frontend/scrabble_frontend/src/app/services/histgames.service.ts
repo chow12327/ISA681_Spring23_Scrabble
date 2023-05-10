@@ -17,13 +17,13 @@ export class HistgamesService {
   constructor(private httpClient: HttpClient) {   }
 
   getActiveGameslist(): Observable<Histgame[]> {
-    return this.httpClient.get<Histgame[]>(this.baseURL2).pipe(
+    return this.httpClient.get<Histgame[]>(this.baseURL2, {withCredentials: true}).pipe(
     
     );
   } 
 
   getHistGameslist(): Observable<Histgame[]> {
-    return this.httpClient.get<Histgame[]>(this.baseURL).pipe(
+    return this.httpClient.get<Histgame[]>(this.baseURL, {withCredentials: true}).pipe(
     //  map(response => response.players)
     );
   }

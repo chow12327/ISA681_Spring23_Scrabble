@@ -14,16 +14,18 @@ export class BasicAuthenticationService {
 
   executeJWTAuthenticationService(username: string, password: string) {
     
+    this.http.get<any>(`${API_URL}/csrf`).pipe();
+
     return this.http.post<any>(
       `${API_URL}/authenticate`,{
         username,
         password
-      }).pipe(
+      },{withCredentials: true}).pipe(
         map(
           data => {
-            sessionStorage.setItem(AUTHENTICATED_USER, username);
-            sessionStorage.setItem(TOKEN, `Bearer ${data.token}`);
-            return data;
+           // sessionStorage.setItem(AUTHENTICATED_USER, username);
+          //  sessionStorage.setItem(TOKEN, `Bearer ${data.token}`);
+           // return data;
           }
         )
       );
