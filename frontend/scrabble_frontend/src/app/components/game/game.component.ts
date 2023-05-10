@@ -37,6 +37,11 @@ export class GameComponent implements OnInit{
 
   gamemoves: [MoveWords]
 
+  username: any
+  
+  m: number=3;
+  s: number;
+
   constructor( private route: ActivatedRoute,
     private router: Router,
     private initializeGridService: InitializeGridService,
@@ -48,6 +53,26 @@ export class GameComponent implements OnInit{
     this.route.params.subscribe((params: Params) => this.gameid = (params['gameId']));
     this.initializeGrid();
     this.getGameDetails();
+    this.username = this.basicAuthenticationService.getAuthenticatedUser();
+
+    //timer starts
+
+    setInterval(() => {
+      if(this.m > 0){
+        if(this.s>0){
+          this.s--;
+        }
+        else{
+          this.s=60;
+          this.m--;
+        }
+      }
+      else{
+        alert("time up!!")
+      }
+    }, 1000);
+    
+    //timer end
   }
 
 
