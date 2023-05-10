@@ -63,12 +63,13 @@ export class GameComponent implements OnInit{
           this.s--;
         }
         else{
-          this.s=60;
+          this.s=59;
           this.m--;
         }
       }
       else{
-        alert("time up!!")
+        //alert("time up!!");
+        this.m=3;
       }
     }, 1000);
     
