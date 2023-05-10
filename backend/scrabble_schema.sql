@@ -46,14 +46,17 @@ CREATE TABLE IF NOT EXISTS `scrabble`.`player` (
   `playerID` BIGINT NOT NULL AUTO_INCREMENT,
   `first_name` VARCHAR(25) NULL DEFAULT NULL,
   `last_name` VARCHAR(25) NULL DEFAULT NULL,
-  `username` VARCHAR(25) NULL DEFAULT NULL,
+  `username` VARCHAR(50) NULL DEFAULT NULL,
   `emailID` VARCHAR(320) NULL DEFAULT NULL,
-  `password` BINARY(60) NULL DEFAULT NULL,
-  `salt` BINARY(64) NULL DEFAULT NULL,
+  `password` CHAR(68) NULL DEFAULT NULL,
+  `enabled` TINYINT NULL DEFAULT NULL,
+  `role` VARCHAR(50) NULL DEFAULT NULL,
+  `wins` SMALLINT NULL DEFAULT NULL,
+  `losses` SMALLINT NULL DEFAULT NULL,
   `create_date` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `update_date` DATETIME NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`playerID`),
-  KEY(`username`))
+  UNIQUE(`username`))
 AUTO_INCREMENT = 1;
 
 -- -----------------------------------------------------
@@ -76,7 +79,7 @@ AUTO_INCREMENT = 1;
 -- Table `scrabble`.`GamePlayers`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `scrabble`.`gameplayers` (
-  `gameplayerID` BIGINT NOT NULL AUTO_INCREMENT,
+  `gamePlayerID` BIGINT NOT NULL AUTO_INCREMENT,
   `gameID` BIGINT NOT NULL,
   `playerID`BIGINT NOT NULL,
   `is_winner` BOOLEAN NULL DEFAULT NULL,
@@ -88,21 +91,17 @@ CREATE TABLE IF NOT EXISTS `scrabble`.`gameplayers` (
   CONSTRAINT `fk_gameplayersplayerID` FOREIGN KEY (`playerID`) REFERENCES `player` (`playerID`)
 );
 
-
-
 -- -----------------------------------------------------
 -- Table `scrabble`.`GameMoves`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `scrabble`.`gamemoves` (
   `moveID` BIGINT NOT NULL AUTO_INCREMENT,
-  `gameID` BIGINT NOT NULL,
-  `playerID` BIGINT NOT NULL,
+  `gamePlayerID` BIGINT NOT NULL,
   `total_score` SMALLINT NULL DEFAULT NULL,
   `create_date` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `update_date` DATETIME NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`moveID`),
-  CONSTRAINT `fk_gamemovesgameID` FOREIGN KEY (`gameID`) REFERENCES `game` (`gameID`),
-  CONSTRAINT `fk_gamemovesplayerID` FOREIGN KEY (`playerID`) REFERENCES `player` (`playerID`)
+  CONSTRAINT `fk_gamemovesplayerID` FOREIGN KEY (`gamePlayerID`) REFERENCES `gameplayers` (`gamePlayerID`)
 )
 AUTO_INCREMENT = 1;
 
@@ -140,7 +139,6 @@ CREATE TABLE IF NOT EXISTS `scrabble`.`movewords` (
 ) 
 AUTO_INCREMENT = 1;
 
-
 -- -----------------------------------------------------
 -- Table `scrabble`.`gameplayerletters`
 -- -----------------------------------------------------
@@ -148,14 +146,12 @@ CREATE TABLE IF NOT EXISTS `scrabble`.`gameplayerletters` (
   `gameplayerletterID` BIGINT NOT NULL AUTO_INCREMENT,
   `gameplayerID` BIGINT NOT NULL,
   `letterID` BIGINT NOT NULL,
-  `moveID` BIGINT NOT NULL,
   `is_used` BOOLEAN NOT NULL,
   `create_date` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `update_date` DATETIME NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`gameplayerletterID`),
-  CONSTRAINT `fk_gameplayerlettersgameplayerID` FOREIGN KEY (`moveID`) REFERENCES `gameplayers` (`gameplayerID`),
-  CONSTRAINT `fk_gameplayerlettersletterID` FOREIGN KEY (`letterID`) REFERENCES `letters` (`letterID`),
-  CONSTRAINT `fk_gameplayerlettersmoveID` FOREIGN KEY (`moveID`) REFERENCES `gamemoves` (`moveID`)
+  CONSTRAINT `fk_gameplayerlettersgameplayerID` FOREIGN KEY (`gameplayerID`) REFERENCES `gameplayers` (`gameplayerID`),
+  CONSTRAINT `fk_gameplayerlettersletterID` FOREIGN KEY (`letterID`) REFERENCES `letters` (`letterID`)
 ) 
 AUTO_INCREMENT = 1;
 
