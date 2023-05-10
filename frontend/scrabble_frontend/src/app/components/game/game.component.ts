@@ -72,10 +72,9 @@ export class GameComponent implements OnInit{
         this.m=3;
       }
     }, 1000);
-    
     //timer end
-  }
 
+  }
 
   getGameDetails()
   {
