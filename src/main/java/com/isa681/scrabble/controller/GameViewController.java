@@ -13,7 +13,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 @RestController
-@CrossOrigin(origins="https://localhost:4043")
+//@CrossOrigin(origins="https://localhost:4043")
 public class GameViewController {
     private GetGameInfoService myService;
     Logger myLogger = LoggerFactory.getLogger(GameController.class);

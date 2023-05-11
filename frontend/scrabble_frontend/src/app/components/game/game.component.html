@@ -13,8 +13,7 @@
         </div>
         <div class="col" >
             <button  (click)=lgout() class="btn btn-primary float-right mb-1" >Logout</button>
-            <p class="mr-4 mb-1 ml-1 float-right" >{{m}} min&nbsp;{{s}} sec</p>
-
+            <p *ngIf="!gameover" class="mr-4 mb-1 ml-1 float-right" >{{m}} min&nbsp;{{s}} sec</p>
         </div>
     </div>
 
@@ -216,7 +215,7 @@
     </div>
 
     <div class="row mt-0 ml-2" >
-        <div class="col-md-3 mt-2">
+        <div  *ngIf="!gameover" class="col-md-3 mt-2">
             <div class="row">
                 <label class="col col-form-label font-weight-bold">Your Letters</label>
             </div>
@@ -234,6 +233,11 @@
                         <button (click)=submitMove() class="btn btn-success" [disabled]=turn>Submit</button>
                     </div>
                 </div>
+            </div>
+        </div>
+        <div *ngIf="gameover" class="col-md-3 mt-2">
+            <div class="row">
+                <label class="col col-form-label font-weight-bold">This game is over!</label>
             </div>
         </div>
 

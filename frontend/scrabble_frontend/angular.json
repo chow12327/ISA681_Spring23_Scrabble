@@ -69,9 +69,15 @@
           "options": {
             "sslKey": "/Users/nidhichowdhry/Documents/GMU/ISA 681/example.key",
             "sslCert": "/Users/nidhichowdhry/Documents/GMU/ISA 681/example.crt",
+            "ssl": true,
             "port": 4043,
             "headers": {
               "X-Frame-Options": "SAMEORIGIN"
+              ,"Content-Security-Policy": 
+              "default-src 'self'; connect-src 'self' https://localhost:9443; style-src 'unsafe-inline' 'self' https://cdn.jsdelivr.net https://maxcdn.bootstrapcdn.com; script-src 'self' 'unsafe-inline' https://ajax.googleapis.com https://cdnjs.cloudflare.com https://maxcdn.bootstrapcdn.com;"
+              ,"X-Content-Type-Options": "nosniff"
+              ,"Access-Control-Allow-Origin": "https://localhost:9443"
+              ,"Strict-Transport-Security": "max-age=31536000"
             }
           },
           "defaultConfiguration": "development"

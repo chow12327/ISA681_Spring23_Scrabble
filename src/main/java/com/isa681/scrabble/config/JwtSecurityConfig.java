@@ -4,11 +4,14 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.util.Arrays;
 import java.util.UUID;
 
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
@@ -31,6 +34,9 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 
 import com.nimbusds.jose.JOSEException;
@@ -47,30 +53,25 @@ import javax.sql.DataSource;
 public class JwtSecurityConfig {
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
+    public FilterRegistrationBean corsFilter(){
+        final Long MAX_AGE = 3600L;
 
-        return httpSecurity
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/authenticate").permitAll()
-                        .requestMatchers("/createAccount").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/**").hasAuthority("SCOPE_ROLE_USER")
-                        .requestMatchers(HttpMethod.POST, "/api/**").hasAuthority("SCOPE_ROLE_USER")
-                        .requestMatchers(HttpMethod.PUT, "/api/**").hasAuthority("SCOPE_ROLE_USER")
-                        .requestMatchers(HttpMethod.OPTIONS,"/api/**")
-                        .permitAll()
-                        .anyRequest()
-                        .authenticated())
-                .csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(session -> session.
-                        sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .oauth2ResourceServer(
-                        OAuth2ResourceServerConfigurer::jwt)
-                .httpBasic(
-                        Customizer.withDefaults())
-                .headers(header -> {header.
-                        frameOptions().sameOrigin();})
-                .build();
+        UrlBasedCorsConfigurationSource source =  new UrlBasedCorsConfigurationSource();
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowCredentials(true);
+        config.addAllowedOrigin("https://localhost:4043");
+        config.setAllowedHeaders(Arrays.asList(HttpHeaders.AUTHORIZATION,
+                "X-XSRF-TOKEN",
+                HttpHeaders.CONTENT_TYPE,
+                HttpHeaders.ACCEPT));
+        config.setAllowedMethods(Arrays.asList(HttpMethod.GET.name(),HttpMethod.POST.name(),HttpMethod.OPTIONS.name()));
+        config.setMaxAge(MAX_AGE);
+        source.registerCorsConfiguration("/**",config);
+        FilterRegistrationBean bean = new FilterRegistrationBean(new CorsFilter(source));
+        bean.setOrder(-100);
+        return bean;
     }
+
 
     @Bean
     public AuthenticationManager authenticationManager(

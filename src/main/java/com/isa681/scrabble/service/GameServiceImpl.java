@@ -254,7 +254,7 @@ public class GameServiceImpl implements GameService {
         Letter selectedLetter;
         allLetters =letterRepository.findAll();
 
-        selectedLetter = letterRepository.findById(rand.nextLong(allLetters.size())).orElse(null);
+        selectedLetter = letterRepository.findById((rand.nextLong(allLetters.size()))+1).orElse(null);
         return selectedLetter;
     }
 
@@ -818,30 +818,13 @@ public class GameServiceImpl implements GameService {
         for(i=0;i<indexList.size();i++)
         {
             int playedIndex = indexList.get(i);
-            if(playedIndex%6 == 0)
-            {
-                if ((invokeGridGetter(playedIndex - 1, dbGameGrid) != null) ||
-                        (invokeGridGetter(playedIndex - 6, dbGameGrid) != null) ||
-                        (invokeGridGetter(playedIndex + 1, dbGameGrid) != null)) {
-                    return true;
-                }
-            }
-            else if(playedIndex%6 == 1){
-                if ((invokeGridGetter(playedIndex + 1, dbGameGrid) != null) ||
-                        (invokeGridGetter(playedIndex - 6, dbGameGrid) != null) ||
-                        (invokeGridGetter(playedIndex + 6, dbGameGrid) != null)) {
-                    return true;
-                }
-            }
-            else
-            {
+
                 if ((invokeGridGetter(playedIndex - 1, dbGameGrid) != null) ||
                         (invokeGridGetter(playedIndex + 1, dbGameGrid) != null) ||
                         (invokeGridGetter(playedIndex - 6, dbGameGrid) != null) ||
                         (invokeGridGetter(playedIndex + 6, dbGameGrid) != null)) {
                     return true;
                 }
-            }
         }
         return false;
     }
@@ -1225,7 +1208,7 @@ public class GameServiceImpl implements GameService {
             gamePlayerRepository.save(opponentGamePlayer);
         }
 
-        if(myGamePlayer.getGameMoves()!=null && myGamePlayer.getGameMoves().size() ==2
+        if(myGamePlayer.getGameMoves()!=null && myGamePlayer.getGameMoves().size() ==3
                 && opponentGamePlayer!= null
                 && opponentGamePlayer.getGameMoves() !=null && opponentGamePlayer.getGameMoves().size() ==3)
         {

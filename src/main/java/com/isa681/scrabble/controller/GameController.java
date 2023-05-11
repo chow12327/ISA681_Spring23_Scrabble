@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@CrossOrigin(origins="https://localhost:4043")
+//@CrossOrigin(origins="https://localhost:4043")
 public class GameController {
 
     Logger myLogger = LoggerFactory.getLogger(GameController.class);

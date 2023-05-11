@@ -12,7 +12,7 @@ import java.security.Principal;
 
 
 @RestController
-@CrossOrigin(origins="https://localhost:4043")
+//@CrossOrigin(origins="https://localhost:4043")
 public class CreateAccountController {
 
     private CreateAccountService createAccountService;

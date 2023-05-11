@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@CrossOrigin(origins="https://localhost:4043")
+//@CrossOrigin(origins="https://localhost:4043")
 public class JwtAuthenticationController {
 
     private static final Logger myLogger = LogManager.getLogger(GameController.class);

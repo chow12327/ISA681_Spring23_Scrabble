@@ -35,6 +35,8 @@ export class GameComponent implements OnInit{
 
   gameid: string
 
+  gameover: boolean = false
+
   gamemoves: [MoveWords]
 
   username: any
@@ -96,6 +98,14 @@ export class GameComponent implements OnInit{
 
         this.gamemoves = data["moves"]
 
+        if(this.letter5 === '\0')
+        {
+          this.gameover = true;
+        }
+
+        console.log(this.gameover)
+        console.log(this.letter5)
+
       },
       error => {
         if (error.status == 401 || error.status == 0) {
@@ -110,22 +120,6 @@ export class GameComponent implements OnInit{
       }
     )
   }
-
-  // initializeGrid() {
-  //   //this.gameGrid = this.initializeGridService.initializeGrid()
-  //   this.initializeGridService.initializeGrid().subscribe(
-  //     data => {
-  //       this.gameGrid = data;
-  //     },
-  //     error => {
-  //       if (error.status === 401) {
-  //        // this.basicAuthenticationService.logout();
-  //        // this.router.navigate(['login']);
-  //       }
-  //     }
-  //   )
-  // }
-
 
 
   lgout(){
@@ -149,6 +143,9 @@ export class GameComponent implements OnInit{
       data => {
         this.moveSuccess =  true;
         this.moveSuccessMessage = "Move submitted successfully!"
+
+        setTimeout(() => {}, 3000);
+        window.location.reload();
       },
       error => {
 
