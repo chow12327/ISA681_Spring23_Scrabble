@@ -142,7 +142,7 @@ export class DashboardComponent implements OnInit {
 
   lgout(){
     this.basicAuthenticationService.logout()
-    alert("you have successfully logged out")
+    alert("You have successfully logged out!")
     this.router.navigate(['login'])
   }
 

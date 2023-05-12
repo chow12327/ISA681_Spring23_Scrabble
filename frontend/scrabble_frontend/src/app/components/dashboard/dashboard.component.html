@@ -1,14 +1,11 @@
 <div class="container">
-
-    <div class="row bg-light">
-        <div class="col-6 ">
-            <a href="../dashboard" style="text-decoration:none">
-                <h1 class="mt-3 ">Welcome to Scrabble</h1></a>
-        </div>
-        <div class="col">
-            <h4 class="mt-4 float-right">Hello {{username}}</h4>
-        </div>
+    <br>
+    <div class="row">
+            <a href="../dashboard">
+                <h1 class="mt-3 "> Hey {{username}}, Scrabble here! Welcome to your Dashboard!</h1></a>
     </div>
+    <div class="logout"><button  (click)=lgout() class="btn btn-primary float-right mb-1" >Logout</button></div>
+    <br><br>
     <div class="row mt-1">
         <div class="col" >
             <div class="alert alert-danger" *ngIf="moveError">
@@ -16,7 +13,6 @@
             </div>
         </div>
         <div class="col" >
-            <button  (click)=lgout() class="btn btn-primary float-right mb-1" >Logout</button>
             <button  (click)="EnterGame()" class="btn btn-primary mr-4 mb-1 ml-1 float-right" >Join Game</button>
 
             <input type="number"  class="form-control float-right w-25 mb-1 mr-1" id="gmid" name="gmid" min="0" [(ngModel)]="game.gmid" #gmid="ngModel">
