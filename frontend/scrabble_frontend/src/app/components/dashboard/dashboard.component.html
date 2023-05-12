@@ -2,7 +2,8 @@
     <br>
     <div class="row">
             <a href="../dashboard">
-                <h1 class="mt-3 "> Hey {{username}}, Scrabble here! Welcome to your Dashboard!</h1></a>
+                <h1 class="mt-3">Scrabble!</h1>
+                <h1 class="mt-3 "> Hey {{username}}! Welcome to your Dashboard!</h1></a>
     </div>
     <div class="logout"><button  (click)=lgout() class="btn btn-primary float-right mb-1" >Logout</button></div>
     <br><br>
@@ -13,7 +14,10 @@
             </div>
         </div>
         <div class="col" >
-            <button  (click)="EnterGame()" class="btn btn-primary mr-4 mb-1 ml-1 float-right" >Join Game</button>
+            <div class="startNewGame">
+                <button (click)=startNewGame() class="btn btn-success">Start New Game</button>
+            </div>
+            <button  (click)="EnterGame()" class="btn btn-primary mr-4 mb-1 ml-1 float-right" >Join Game by GameId</button>
 
             <input type="number"  class="form-control float-right w-25 mb-1 mr-1" id="gmid" name="gmid" min="0" [(ngModel)]="game.gmid" #gmid="ngModel">
             <div *ngIf="gmid.invalid && (gmid.dirty || gmid.touched)" class="alert alert-danger">
@@ -23,6 +27,8 @@
             </div>
         </div>
     </div>
+    <br>
+    <br>
 
     <div class="container">
         <div class="row mt-2 mb-2" >
@@ -30,10 +36,10 @@
                 <h5>Player Wins and Losses</h5>
             </div>
             <div class="col">
-                <h5>View Historical Games</h5>
+                <h5>Historical Games</h5>
             </div>
             <div class="col">
-                <button (click)=startNewGame() class="btn btn-success">Start New Game</button>
+                <h5>Active Games</h5>
             </div>
         </div>
 
