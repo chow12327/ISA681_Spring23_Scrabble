@@ -22,6 +22,8 @@ export class LoginComponent implements OnInit {
 
   ngOnInit(): void {
     this.basicAuthenticationService.logout()
+    this.getCSRFToken();
+    
   }
 
   handleJWTAuthLogin() {
@@ -41,6 +43,20 @@ export class LoginComponent implements OnInit {
 
   navigatetoSignUp() {
     this.router.navigate(['signup'])
+  }
+
+  getCSRFToken() {
+    this.basicAuthenticationService.getCSRFToken()
+    .subscribe(
+      data => {
+        console.log(data)
+      
+      },
+      error => {
+        console.log(error)
+     
+      }
+    )
   }
 
 }

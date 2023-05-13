@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-//@CrossOrigin(origins="https://localhost:4043")
 public class GameController {
 
     Logger myLogger = LoggerFactory.getLogger(GameController.class);
@@ -72,7 +71,7 @@ public class GameController {
         return ResponseEntity.ok(myBoard);
     }
 
-    @GetMapping("/api/timeout")
+    @PostMapping("/api/timeout")
     public void timeoutGames(){
         myLogger.info("Timeout invoked!");
         gameService.timeoutGames();

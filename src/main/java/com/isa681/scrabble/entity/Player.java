@@ -27,13 +27,15 @@ public class Player {
     private Long id;
     @Column(name="firstName")
     @Getter @Setter
+    @JsonIgnore
     private String firstName;
     @Column(name="lastName")
     @Getter @Setter
+    @JsonIgnore
     private String lastName;
     @Column(name="emailID")
     @Getter @Setter
-    //@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @JsonIgnore
     private String emailId;
     @Column(name="username")
@@ -41,7 +43,7 @@ public class Player {
     private String userName;
     @Column(name="password")
     @Getter @Setter
-    //@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @JsonIgnore
     private char[] password;
     @Column(name="wins")
@@ -53,10 +55,12 @@ public class Player {
     @Column(name="createDate")
     @Getter @Setter
     @CreationTimestamp
+    @JsonIgnore
     private Date createDate;
     @Column(name="updateDate")
     @Getter @Setter
     @UpdateTimestamp
+    @JsonIgnore
     private Date updateDate;
 
     @Column(name="role")

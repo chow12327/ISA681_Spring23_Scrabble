@@ -35,6 +35,7 @@ export class BasicAuthenticationService {
   }
 
   getAuthenticatedToken() {
+
     if(this.getAuthenticatedUser())
       return sessionStorage.getItem(TOKEN)
     else
@@ -50,6 +51,21 @@ export class BasicAuthenticationService {
     sessionStorage.removeItem(AUTHENTICATED_USER)
     sessionStorage.removeItem(TOKEN)
   }
+
+  getCSRFToken() {
+    
+    return this.http.get<any>(
+      `${API_URL}/csrf`,{withCredentials: true
+      }).pipe(
+        map(
+          data => {
+            return data;
+          }
+        )
+      );
+    //console.log("Execute Hello World Bean Service")
+  }
+
 
 }
 

@@ -12,7 +12,10 @@ import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfTokenRequestHandler;
+import org.springframework.security.web.csrf.XorCsrfTokenRequestAttributeHandler;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
+import org.springframework.security.web.util.matcher.AnyRequestMatcher;
 
 import javax.sql.DataSource;
 
@@ -30,9 +33,37 @@ public class ScrabbleSecurityConfig{
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
 
+        CookieCsrfTokenRepository tokenRepository = CookieCsrfTokenRepository.withHttpOnlyFalse();
+        XorCsrfTokenRequestAttributeHandler delegate = new XorCsrfTokenRequestAttributeHandler();
+
+        delegate.setCsrfRequestAttributeName("_csrf");
+        CsrfTokenRequestHandler requestHandler = delegate::handle;
+
         httpSecurity
-                .csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                .and()
+                .securityMatcher("/api/**")
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.GET, "/api/gameDetails").hasAuthority("SCOPE_ROLE_USER")
+                        .requestMatchers(HttpMethod.GET, "/api/historicgames").hasAuthority("SCOPE_ROLE_USER")
+                        .requestMatchers(HttpMethod.GET, "/api/activegames").hasAuthority("SCOPE_ROLE_USER")
+                        .requestMatchers(HttpMethod.GET, "/api/players").hasAuthority("SCOPE_ROLE_USER")
+                        .requestMatchers(HttpMethod.POST,"/api/timeout").hasAuthority("SCOPE_ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/creategame").hasAuthority("SCOPE_ROLE_USER")
+                        .requestMatchers(HttpMethod.POST, "/api/joinGame").hasAuthority("SCOPE_ROLE_USER")
+                        .requestMatchers(HttpMethod.POST, "/api/submitMove").hasAuthority("SCOPE_ROLE_USER")
+                        .requestMatchers(HttpMethod.OPTIONS, "/api/gameDetails").hasAuthority("SCOPE_ROLE_USER")
+                        .requestMatchers(HttpMethod.OPTIONS, "/api/historicgames").hasAuthority("SCOPE_ROLE_USER")
+                        .requestMatchers(HttpMethod.OPTIONS, "/api/activegames").hasAuthority("SCOPE_ROLE_USER")
+                        .requestMatchers(HttpMethod.OPTIONS, "/api/players").hasAuthority("SCOPE_ROLE_USER")
+                        .requestMatchers(HttpMethod.OPTIONS,"/api/timeout").hasAuthority("SCOPE_ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.OPTIONS, "/api/creategame").hasAuthority("SCOPE_ROLE_USER")
+                        .requestMatchers(HttpMethod.OPTIONS, "/api/joinGame").hasAuthority("SCOPE_ROLE_USER")
+                        .requestMatchers(HttpMethod.OPTIONS, "/api/submitMove").hasAuthority("SCOPE_ROLE_USER")
+                        .anyRequest()
+                        .authenticated())
+                .csrf((csrf) -> csrf
+                        .csrfTokenRepository(tokenRepository)
+                        .csrfTokenRequestHandler(requestHandler)
+                )
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt)
@@ -40,16 +71,8 @@ public class ScrabbleSecurityConfig{
                         Customizer.withDefaults())
                 .headers(header -> {
                     header.frameOptions().sameOrigin();
-                    header.httpStrictTransportSecurity().includeSubDomains(true).maxAgeInSeconds(31536000);
-                })
-                .securityMatcher("/api/**")
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.GET, "/api/**").hasAuthority("SCOPE_ROLE_USER")
-                        .requestMatchers(HttpMethod.POST, "/api/**").hasAuthority("SCOPE_ROLE_USER")
-                        .requestMatchers(HttpMethod.PUT, "/api/**").hasAuthority("SCOPE_ROLE_USER")
-                        .requestMatchers(HttpMethod.OPTIONS,"/api/**").permitAll()
-                        .anyRequest()
-                        .authenticated());
+                    header.httpStrictTransportSecurity().requestMatcher(AnyRequestMatcher.INSTANCE).includeSubDomains(true).maxAgeInSeconds(31536000);
+                });
 
         return httpSecurity.build();
     }
