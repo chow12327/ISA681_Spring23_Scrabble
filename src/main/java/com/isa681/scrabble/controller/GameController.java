@@ -50,17 +50,6 @@ public class GameController {
         gameService.submitMove(myMove.getGameGrid(),myMove.getGameId(),username);
     }
 
-
-//    @GetMapping("/api/playerLetters")
-//    public ResponseEntity<List<PlayerLetter>> getPlayerLetters(@RequestParam Long gameId){
-//
-//        ValidationController.validateGameId(gameId);
-//        List<PlayerLetter> playerLetters;
-//        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-//        playerLetters = gameService.getLettersforPlayer(gameId,username);
-//        return ResponseEntity.ok(playerLetters);
-//    }
-
     @GetMapping("/api/gameDetails")
     public ResponseEntity<GameBoardResponse> getGameBoardResponse(@RequestParam Long gameId){
         GameBoardResponse myBoard = new GameBoardResponse();
